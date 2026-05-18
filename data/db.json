@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": "f008538b-b515-4abf-ae38-1f931eda150c",
+      "nome": "Test User",
+      "email": "test@example.com",
+      "password": "password123"
+    },
+    {
+      "id": "b363929a-be49-4e00-857c-2a2ed923241f",
+      "nome": "Test User",
+      "email": "test-ui@example.com",
+      "password": "password123"
+    }
+  ]
+}
