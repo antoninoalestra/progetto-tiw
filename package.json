@@ -1,0 +1,24 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antoninoalestra/progetto-tiw.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/antoninoalestra/progetto-tiw/issues"
+  },
+  "homepage": "https://github.com/antoninoalestra/progetto-tiw#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
