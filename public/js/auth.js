@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const nome = document.getElementById('nome').value;
+      const cognome = document.getElementById('cognome').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ nome, email, password })
+          body: JSON.stringify({ nome, cognome, email, password })
         });
 
         const data = await response.json();

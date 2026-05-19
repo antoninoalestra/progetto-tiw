@@ -7,11 +7,15 @@ import Database from '../models/Database.js';
  */
 export const addExpense = async (req, res) => {
   try {
-    const { groupId, description, amount, payerId } = req.body;
+    const { groupId, description, amount, payerId, requesterId, participantsId } = req.body;
 
     // Validazione dei campi in ingresso
-    if (!groupId || !description || amount === undefined || amount === null || !payerId) {
-      return res.status(400).json({ error: 'Tutti i campi (groupId, description, amount, payerId) sono obbligatori.' });
+    if (!groupId || !description || amount === undefined || amount === null || !payerId || !requesterId) {
+      return res.status(400).json({ error: 'Tutti i campi (incluso requesterId) sono obbligatori.' });
+    }
+
+    if (requesterId !== payerId) {
+      return res.status(403).json({ error: 'Operazione negata. Puoi registrare solo spese da te effettuate.' });
     }
 
     if (description.trim().length < 2) {
@@ -36,11 +40,21 @@ export const addExpense = async (req, res) => {
       return res.status(400).json({ error: 'Il gruppo non ha membri.' });
     }
 
-    // Calcola la divisione in parti uguali, arrotondata a 2 decimali
-    const splitAmount = parseFloat((amount / members.length).toFixed(2));
+    // Identifica chi partecipa alla spesa (default tutti)
+    let activeParticipants = members;
+    if (participantsId && Array.isArray(participantsId) && participantsId.length > 0) {
+      activeParticipants = participantsId;
+    }
+
+    if (activeParticipants.length === 0) {
+      return res.status(400).json({ error: 'Nessun partecipante valido per questa spesa.' });
+    }
+
+    // Calcola la divisione in parti uguali tra chi partecipa
+    const splitAmount = parseFloat((amount / activeParticipants.length).toFixed(2));
 
     // Genera l'array di divisione (splits)
-    const splits = members.map(memberId => ({
+    const splits = activeParticipants.map(memberId => ({
       userId: memberId,
       amountOwed: splitAmount
     }));
@@ -57,6 +71,11 @@ export const addExpense = async (req, res) => {
 
     // Salva nel database (l'ID viene generato automaticamente dal DAL)
     const savedExpense = await Database.insert('expenses', newExpense);
+
+    // Emetti evento socket per aggiornare gli altri client in real-time
+    if (req.io) {
+      req.io.to(`group_${groupId}`).emit('update_data', { type: 'expense', data: savedExpense });
+    }
 
     res.status(201).json({ message: 'Spesa aggiunta con successo.', expense: savedExpense });
   } catch (error) {

@@ -11,7 +11,24 @@ document.addEventListener('DOMContentLoaded', () => {
         toastContainer.id = 'toast-container';
         document.body.appendChild(toastContainer);
     }
+
+    // Inizializza Dark Mode
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        const btn = document.getElementById('theme-toggle-btn');
+        if (btn) btn.textContent = '☀️';
+    }
 });
+
+/**
+ * Attiva o disattiva la Dark Mode e salva la preferenza.
+ */
+window.toggleTheme = function() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+};
 
 /**
  * Mostra un banner di notifica Toast in basso a destra.

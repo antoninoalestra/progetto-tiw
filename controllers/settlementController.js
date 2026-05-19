@@ -7,11 +7,15 @@ import Database from '../models/Database.js';
  */
 export const addSettlement = async (req, res) => {
   try {
-    const { groupId, payerId, payeeId, amount } = req.body;
+    const { groupId, payerId, payeeId, amount, requesterId } = req.body;
 
     // Validazione dei dati di base
-    if (!groupId || !payerId || !payeeId || amount === undefined || amount === null) {
-      return res.status(400).json({ error: 'I campi groupId, payerId, payeeId e amount sono obbligatori.' });
+    if (!groupId || !payerId || !payeeId || amount === undefined || amount === null || !requesterId) {
+      return res.status(400).json({ error: 'I campi groupId, payerId, payeeId, amount e requesterId sono obbligatori.' });
+    }
+
+    if (requesterId !== payerId) {
+      return res.status(403).json({ error: 'Operazione negata. Puoi saldare solo i tuoi debiti.' });
     }
 
     const numericAmount = parseFloat(amount);
@@ -30,6 +34,11 @@ export const addSettlement = async (req, res) => {
 
     // Salva nella collezione "settlements"
     const newSettlement = await Database.insert('settlements', settlementData);
+
+    // Emetti evento socket per aggiornare in real-time
+    if (req.io) {
+      req.io.to(`group_${groupId}`).emit('update_data', { type: 'settlement', data: newSettlement });
+    }
 
     res.status(201).json(newSettlement);
   } catch (error) {

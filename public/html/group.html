@@ -3,66 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dettaglio Gruppo</title>
+  <title>Dettaglio Gruppo | Split & Pay</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <header>
-    <h1 id="group-title">Caricamento Gruppo...</h1>
-    <a href="#" id="backToDashboard" class="btn">&larr; Dashboard</a>
-  </header>
+  <main class="container">
+    
+    <!-- Top Bar Interna (Sostituisce Header Globale) -->
+    <div class="top-bar-inner">
+      <div class="top-bar-left">
+        <h1 id="group-title" style="font-size: 1.8rem; margin: 0; line-height: 1;"><span class="skeleton-title"></span></h1>
+        <div id="invite-code-container" style="display: none; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 0.85rem; font-weight: 500; text-transform: uppercase;">Codice Invito:</span> 
+          <span class="code-badge" id="group-invite-code" style="padding: 0.2rem 0.6rem; font-size: 1rem;"></span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button id="theme-toggle-btn" class="btn btn-secondary" onclick="window.toggleTheme()" style="border-radius:50%; padding:0; width:40px; height:40px; display:flex; justify-content:center; align-items:center; font-size:1.2rem;">🌙</button>
+        <a id="export-pdf-btn" href="#" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); font-size: 0.9rem; padding: 0.5rem 1rem;">PDF Report</a>
+        <a href="dashboard.html" class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">&larr; Home</a>
+      </div>
+    </div>
+    
+    <!-- MOBILE-ONLY TAB MENU -->
+    <div class="mobile-only mobile-group-tabs">
+        <button class="m-tab active" data-target="m-spese">Spese</button>
+        <button class="m-tab" data-target="m-saldi">Saldi</button>
+        <button class="m-tab" data-target="m-membri">Membri</button>
+    </div>
 
-  <div class="container">
     <div class="group-grid">
-      <!-- Sezione 1: Aggiungi Spesa -->
-      <div class="card">
-        <h2>Aggiungi Spesa</h2>
-        <form id="add-expense-form">
-          <div>
-            <label for="description">Descrizione:</label>
-            <input type="text" id="description" name="description" required placeholder="Es: Cena in pizzeria">
+      
+      <!-- COLONNA SINISTRA -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- SEZIONE: Membri del Gruppo -->
+        <section class="card m-section m-membri">
+          <h2>Membri del Gruppo</h2>
+          <div id="members-list" style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <!-- Popolato via JS -->
           </div>
-          <div>
-            <label for="amount">Importo Totale (€):</label>
-            <input type="number" id="amount" name="amount" step="0.01" min="0.01" required placeholder="0.00">
+        </section>
+
+        <!-- SEZIONE: Rimborsi Suggeriti -->
+        <section class="card m-section m-saldi">
+          <h2>Rimborsi Suggeriti</h2>
+          <p style="font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-muted);">
+            Qui vedi i rimborsi minimi necessari per azzerare i conti. Puoi saldare solo i debiti in cui sei tu a dover pagare.
+          </p>
+          <div id="suggested-settlements-list">
+            <!-- Popolato via JS -->
           </div>
-          <div>
-            <label for="payer">Chi ha pagato?</label>
-            <select id="payer" name="payerId" required>
-              <option value="">-- Seleziona un membro --</option>
-              <!-- Popolato dinamicamente da JS -->
-            </select>
-          </div>
-          <button type="submit">Salva Spesa</button>
-        </form>
+        </section>
       </div>
 
-      <!-- Sezione 2: Lista Spese -->
-      <div class="card">
-        <h2>Storico Spese</h2>
-        <div id="expenses-list">
-          <!-- Popolato via JS -->
-        </div>
+      <!-- COLONNA DESTRA -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- SEZIONE: Storico Spese -->
+        <section class="card m-section m-spese m-active" style="flex-grow: 1; display: flex; flex-direction: column;">
+          <h2>Storico Spese</h2>
+          <div id="expenses-list" style="flex-grow: 1; max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
+            <!-- Popolato via JS con il Template qui sotto -->
+          </div>
+          
+          <!-- Template Strutturale HTML5 (Pattern proposto) -->
+          <template id="expense-item-template">
+            <div class="expense-item">
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <strong style="font-size: 1.05rem;"><span style="margin-right: 5px;">🛒</span><span class="tpl-desc"></span></strong>
+                <span class="tpl-amount" style="font-weight: 600; background:rgba(99,102,241,0.1); color:var(--primary-hover); padding:0.2rem 0.5rem; border-radius:8px;"></span>
+              </div>
+              <div style="display:flex; align-items:center; margin-top:0.4rem;">
+                <span class="tpl-avatar"></span> <small style="color: var(--text-muted);">Pagato da: <span class="tpl-payer"></span></small>
+              </div>
+            </div>
+          </template>
+        </section>
       </div>
 
-      <!-- Sezione 3: Rimborsi Suggeriti -->
-      <div class="card">
-        <h2>Rimborsi Suggeriti</h2>
-        <div id="suggested-settlements-list">
-          <!-- Popolato via JS -->
-        </div>
-      </div>
-
-      <!-- Sezione 4: Storico Rimborsi -->
-      <div class="card">
+      <!-- SEZIONE: Storico Rimborsi Effettuati -->
+      <section class="card m-section m-saldi" style="grid-column: 1 / -1;">
         <h2>Storico Rimborsi</h2>
-        <div id="past-settlements-list">
+        <div id="past-settlements-list" class="dashboard-grid">
           <!-- Popolato via JS -->
         </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Floating Action Button -->
+  <button id="fab-add-expense" class="fab">+</button>
+
+  <!-- Modale Aggiungi Spesa -->
+  <div id="expense-modal" class="modal-overlay">
+    <div class="modal-content glass-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Aggiungi Spesa</h2>
+        <button id="close-modal-btn" style="background: transparent; box-shadow: none; color: var(--text-muted); font-size: 2rem; padding: 0; line-height: 0.5;">&times;</button>
       </div>
+      <form id="add-expense-form">
+        <label for="description">Cosa hai pagato?</label>
+        <input type="text" id="description" required placeholder="Es: Cena in pizzeria">
+        
+        <label for="amount">Importo Totale (€):</label>
+        <input type="number" id="amount" step="0.01" min="0.01" required placeholder="0.00">
+        
+        <div id="participants-container" style="margin-top: 1rem;"></div>
+
+        <button type="submit" style="margin-top: 1rem; width: 100%;">Conferma Spesa</button>
+      </form>
     </div>
   </div>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script src="../js/utils.js"></script>
   <script src="../js/group.js"></script>
 </body>

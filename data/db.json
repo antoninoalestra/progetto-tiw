@@ -3,14 +3,37 @@
     {
       "id": "u1",
       "nome": "Marco",
+      "cognome": "Rossi",
       "email": "marco@example.com",
-      "password": "pwd"
+      "password": "password123"
     },
     {
       "id": "u2",
       "nome": "Giulia",
+      "cognome": "Bianchi",
       "email": "giulia@example.com",
-      "password": "pwd"
+      "password": "password123"
+    },
+    {
+      "id": "u3",
+      "nome": "Luca",
+      "cognome": "Verdi",
+      "email": "luca@example.com",
+      "password": "password123"
+    },
+    {
+      "id": "u4",
+      "nome": "Sofia",
+      "cognome": "Neri",
+      "email": "sofia@example.com",
+      "password": "password123"
+    },
+    {
+      "id": "u5",
+      "nome": "Alessandro",
+      "cognome": "Ferrari",
+      "email": "alessandro@example.com",
+      "password": "password123"
     }
   ],
   "groups": [
@@ -18,6 +41,33 @@
       "id": "g1",
       "name": "Vacanze Roma",
       "creatorId": "u1",
+      "adminId": "u1",
+      "inviteCode": "ROMA26",
+      "members": [
+        "u1",
+        "u2",
+        "u3"
+      ]
+    },
+    {
+      "id": "g2",
+      "name": "Regalo Laurea",
+      "creatorId": "u4",
+      "adminId": "u4",
+      "inviteCode": "LAUR99",
+      "members": [
+        "u2",
+        "u3",
+        "u4",
+        "u5"
+      ]
+    },
+    {
+      "id": "g3",
+      "name": "Spese Casa",
+      "creatorId": "u2",
+      "adminId": "u2",
+      "inviteCode": "CASA12",
       "members": [
         "u1",
         "u2"
@@ -26,22 +76,118 @@
   ],
   "expenses": [
     {
-      "id": "7a545748-6e38-4a16-b12d-c2b5ddec01d4",
+      "id": "e1",
       "groupId": "g1",
-      "description": "Cena",
-      "amount": 50,
+      "description": "Hotel 2 notti",
+      "amount": 150,
       "payerId": "u1",
-      "date": "2026-05-19T10:04:04.368Z",
+      "date": "2026-05-18T10:00:00.000Z",
       "splits": [
         {
           "userId": "u1",
-          "amountOwed": 25
+          "amountOwed": 50
         },
         {
           "userId": "u2",
+          "amountOwed": 50
+        },
+        {
+          "userId": "u3",
+          "amountOwed": 50
+        }
+      ]
+    },
+    {
+      "id": "e2",
+      "groupId": "g1",
+      "description": "Cena Trattoria",
+      "amount": 60,
+      "payerId": "u3",
+      "date": "2026-05-18T21:00:00.000Z",
+      "splits": [
+        {
+          "userId": "u1",
+          "amountOwed": 20
+        },
+        {
+          "userId": "u2",
+          "amountOwed": 20
+        },
+        {
+          "userId": "u3",
+          "amountOwed": 20
+        }
+      ]
+    },
+    {
+      "id": "e3",
+      "groupId": "g2",
+      "description": "Regalo principale",
+      "amount": 200,
+      "payerId": "u4",
+      "date": "2026-05-15T15:30:00.000Z",
+      "splits": [
+        {
+          "userId": "u2",
+          "amountOwed": 50
+        },
+        {
+          "userId": "u3",
+          "amountOwed": 50
+        },
+        {
+          "userId": "u4",
+          "amountOwed": 50
+        },
+        {
+          "userId": "u5",
+          "amountOwed": 50
+        }
+      ]
+    },
+    {
+      "id": "15723585-884b-4be7-a67b-d00d1ec7f760",
+      "groupId": "g1",
+      "description": "Pranzo",
+      "amount": 50,
+      "payerId": "u3",
+      "date": "2026-05-19T14:11:37.179Z",
+      "splits": [
+        {
+          "userId": "u2",
+          "amountOwed": 25
+        },
+        {
+          "userId": "u3",
           "amountOwed": 25
         }
       ]
+    }
+  ],
+  "settlements": [
+    {
+      "id": "s1",
+      "groupId": "g1",
+      "payerId": "u2",
+      "payeeId": "u1",
+      "amount": 50,
+      "date": "2026-05-19T09:00:00.000Z"
+    },
+    {
+      "id": "9f72ad3b-6421-41b4-aa66-463dd8273432",
+      "groupId": "g1",
+      "payerId": "u3",
+      "payeeId": "u1",
+      "amount": 10,
+      "date": "2026-05-19T14:04:34.788Z"
+    },
+    {
+      "id": "38516ae6-f648-407b-bbed-db5404a937c9",
+      "groupId": "g2",
+      "payerId": "u3",
+      "payeeId": "u4",
+      "amount": 50,
+      "date": "2026-05-19T14:04:48.739Z"
     }
   ]
 }

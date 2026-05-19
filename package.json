@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/antoninoalestra/progetto-tiw#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pdfkit": "^0.18.0",
+    "socket.io": "^4.8.3"
   }
 }
