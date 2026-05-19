@@ -5,27 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const registerForm = document.getElementById('registerForm');
   const errorMsgDiv = document.getElementById('errorMsg');
 
-  /**
-   * Mostra un messaggio di errore nell'interfaccia.
-   * @param {string} message - Il messaggio da visualizzare.
-   */
-  const showError = (message) => {
-    errorMsgDiv.textContent = message;
-    errorMsgDiv.style.display = 'block';
-  };
-
-  /**
-   * Nasconde il messaggio di errore.
-   */
-  const hideError = () => {
-    errorMsgDiv.style.display = 'none';
-  };
-
   // Gestione del form di registrazione
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      hideError();
 
       const nome = document.getElementById('nome').value;
       const email = document.getElementById('email').value;
@@ -43,14 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok) {
-          // Se la registrazione ha successo, reindirizza al login
-          window.location.href = '/html/login.html';
+          showNotification('Registrazione completata! Puoi ora accedere.', false);
+          setTimeout(() => {
+            window.location.href = '/html/login.html';
+          }, 1500);
         } else {
-          // Mostra l'errore proveniente dal backend
-          showError(data.error || 'Errore durante la registrazione.');
+          showNotification(data.error || 'Errore durante la registrazione.', true);
         }
       } catch (error) {
-        showError('Errore di rete o del server.');
+        showNotification('Errore di rete o del server.', true);
       }
     });
   }
@@ -59,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      hideError();
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -76,17 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok) {
-          // Salva token e dati utente nel localStorage
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
-
-          // Reindirizza alla dashboard
-          window.location.href = '/html/dashboard.html';
+          showNotification('Accesso effettuato con successo!', false);
+          setTimeout(() => {
+            window.location.href = '/html/dashboard.html';
+          }, 1000);
         } else {
-          showError(data.error || 'Errore durante il login.');
+          showNotification(data.error || 'Errore durante il login.', true);
         }
       } catch (error) {
-        showError('Errore di rete o del server.');
+        showNotification('Errore di rete o del server.', true);
       }
     });
   }

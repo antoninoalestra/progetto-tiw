@@ -21,7 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!groupId) {
     groupTitle.textContent = 'Errore: ID Gruppo mancante.';
-    expensesList.innerHTML = '<p>Impossibile caricare le spese.</p>';
+    expensesList.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <p>Impossibile caricare le spese. ID Gruppo mancante.</p>
+      </div>`;
     return;
   }
 
@@ -63,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error(error);
       groupTitle.textContent = 'Errore durante il caricamento del gruppo.';
+      showNotification('Errore durante il caricamento dei dettagli del gruppo.', true);
     }
   }
 
@@ -77,10 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const expenses = await response.json();
 
-      expensesList.innerHTML = ''; // Svuota il contenitore
+      expensesList.innerHTML = '';
 
       if (expenses.length === 0) {
-        expensesList.innerHTML = '<p>Nessuna spesa registrata per questo gruppo.</p>';
+        expensesList.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+            <p>Nessuna spesa registrata. Aggiungi la prima spesa per iniziare a dividere i conti!</p>
+          </div>`;
         return;
       }
 
@@ -102,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error(error);
       expensesList.innerHTML = '<p>Errore nel caricamento delle spese.</p>';
+      showNotification('Errore nel caricamento dello storico spese.', true);
     }
   }
 
@@ -110,15 +120,13 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   addExpenseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    expenseMessage.textContent = '';
-    expenseMessage.style.color = 'red';
 
     const description = document.getElementById('description').value.trim();
     const amount = parseFloat(document.getElementById('amount').value);
     const payerId = document.getElementById('payer').value;
 
-    if (!description || isNaN(amount) || !payerId) {
-      expenseMessage.textContent = 'Compila tutti i campi correttamente.';
+    if (!description || isNaN(amount) || amount <= 0 || !payerId) {
+      showNotification('Compila tutti i campi. L\'importo deve essere > 0.', true);
       return;
     }
 
@@ -142,8 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(result.error || 'Errore durante l\'aggiunta della spesa.');
       }
 
-      expenseMessage.style.color = 'green';
-      expenseMessage.textContent = 'Spesa aggiunta con successo!';
+      showNotification('Spesa aggiunta con successo!', false);
 
       // Resetta il form
       addExpenseForm.reset();
@@ -154,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await loadSettlements();
     } catch (error) {
       console.error(error);
-      expenseMessage.textContent = error.message;
+      showNotification(error.message, true);
     }
   });
 
@@ -172,10 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const suggested = data.suggestedSettlements || [];
       const past = data.pastSettlements || [];
 
-      // Rendi l'HTML dei rimborsi suggeriti
       suggestedSettlementsList.innerHTML = '';
       if (suggested.length === 0) {
-        suggestedSettlementsList.innerHTML = '<p>Tutti i conti sono saldati!</p>';
+        suggestedSettlementsList.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <p>Tutti i conti sono in pari! Nessun rimborso suggerito.</p>
+          </div>`;
       } else {
         suggested.forEach(settlement => {
           const debtorName = usersMap[settlement.debtorId] || 'Utente Sconosciuto';
@@ -202,10 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // Rendi l'HTML dello storico rimborsi
       pastSettlementsList.innerHTML = '';
       if (past.length === 0) {
-        pastSettlementsList.innerHTML = '<p>Nessun rimborso effettuato finora.</p>';
+        pastSettlementsList.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            <p>Nessun rimborso effettuato finora.</p>
+          </div>`;
       } else {
         past.forEach(settlement => {
           const payerName = usersMap[settlement.payerId] || 'Utente Sconosciuto';
@@ -227,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(error);
       suggestedSettlementsList.innerHTML = '<p>Errore nel caricamento dei rimborsi suggeriti.</p>';
       pastSettlementsList.innerHTML = '<p>Errore nel caricamento dello storico rimborsi.</p>';
+      showNotification('Errore durante il caricamento dei rimborsi.', true);
     }
   }
 
@@ -258,12 +272,12 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(errorData.error || 'Errore durante la registrazione del rimborso.');
       }
 
-      // Ricarica la lista dei rimborsi per aggiornare la UI
+      showNotification('Rimborso registrato con successo!', false);
       await loadSettlements();
 
     } catch (error) {
       console.error(error);
-      alert(error.message);
+      showNotification(error.message, true);
     }
   }
 
