@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gruppo - Gestione Spese</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            background-color: #fafafa;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Stili per form mockato */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        /* Stili Rimborsi */
+        #settlements-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #settlements-list li {
+            padding: 10px;
+            background-color: #e9ecef;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 5px solid #007bff;
+            font-size: 16px;
+        }
+
+        .empty-message {
+            color: #777;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Gestione Gruppo</h1>
+        <a href="/">Torna alla Home</a>
+    </header>
+
+    <div class="grid-container">
+
+        <!-- Mock Aggiungi Spesa -->
+        <div class="section">
+            <h2>Aggiungi Spesa (Mock)</h2>
+            <form id="add-expense-form">
+                <div class="form-group">
+                    <label for="desc">Descrizione:</label>
+                    <input type="text" id="desc" name="desc" placeholder="es. Cena in pizzeria" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Importo (€):</label>
+                    <input type="number" id="amount" name="amount" step="0.01" min="0" required>
+                </div>
+                <!-- In un app reale ci sarebbero dropdown per payer e splits -->
+                <button type="submit">Inserisci Spesa</button>
+            </form>
+            <p><small>Nota: Questo form non inserisce realmente dati nel server in questo sprint, ma simula il refresh dei rimborsi.</small></p>
+        </div>
+
+        <!-- Sezione Rimborsi Suggeriti -->
+        <div class="section">
+            <h2>Come saldare i conti</h2>
+            <ul id="settlements-list">
+                <li class="empty-message">Caricamento in corso...</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<script src="/js/group.js"></script>
+</body>
+</html>
