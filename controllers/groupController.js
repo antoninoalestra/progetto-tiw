@@ -1,4 +1,5 @@
 import Database from '../models/Database.js';
+import { calculateNetBalances, optimizeSettlements } from '../utils/balanceCalculator.js';
 
 /**
  * Recupera un gruppo dal suo ID, popolando le informazioni sui membri.
@@ -35,6 +36,43 @@ export const getGroupById = async (req, res) => {
     res.status(200).json(populatedGroup);
   } catch (error) {
     console.error('Errore durante il recupero del gruppo:', error);
+    res.status(500).json({ error: 'Errore interno del server.' });
+  }
+};
+
+/**
+ * Calcola e restituisce i rimborsi suggeriti per un gruppo,
+ * tenendo conto delle spese e dei rimborsi (settlements) già effettuati.
+ * @param {Object} req - L'oggetto richiesta di Express
+ * @param {Object} res - L'oggetto risposta di Express
+ */
+export const getGroupSettlements = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Recupera tutte le spese
+    const allExpenses = await Database.getAll('expenses');
+    // Filtra le spese del gruppo
+    const groupExpenses = allExpenses.filter(e => e.groupId === groupId);
+
+    // Recupera tutti i rimborsi
+    const allSettlements = await Database.getAll('settlements');
+    // Filtra i rimborsi del gruppo
+    const groupSettlements = allSettlements.filter(s => s.groupId === groupId);
+
+    // Calcola i saldi netti tenendo conto sia delle spese sia dei rimborsi
+    const netBalances = calculateNetBalances(groupExpenses, groupSettlements);
+
+    // Calcola i rimborsi suggeriti per azzerare i debiti rimanenti
+    const suggestedSettlements = optimizeSettlements(netBalances);
+
+    res.status(200).json({
+      netBalances,
+      suggestedSettlements,
+      pastSettlements: groupSettlements
+    });
+  } catch (error) {
+    console.error('Errore durante il calcolo dei rimborsi:', error);
     res.status(500).json({ error: 'Errore interno del server.' });
   }
 };
