@@ -1,12 +1,9 @@
 import express from 'express';
-import { getGroupSettlements } from '../controllers/groupController.js';
+import { getGroupById } from '../controllers/groupController.js';
 
 const router = express.Router();
 
-/**
- * Rotta per ottenere i rimborsi suggeriti (settlements) per un gruppo specifico.
- * Ritorna un array di oggetti: { debtorName, creditorName, amount }
- */
-router.get('/:groupId/settlements', getGroupSettlements);
+// Rotta per ottenere un gruppo per ID
+router.get('/:groupId', getGroupById);
 
 export default router;

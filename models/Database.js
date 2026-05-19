@@ -12,16 +12,20 @@ const dbPath = path.join(__dirname, '..', 'data', 'db.json');
 class Database {
   /**
    * Legge i dati dal file JSON.
+   * Inizializza le collezioni se mancano.
    * @returns {Promise<Object>} Un oggetto contenente i dati del database.
    */
   static async readData() {
+    let dbData = { users: [], groups: [], expenses: [] };
     try {
       const data = await fs.readFile(dbPath, 'utf8');
-      return JSON.parse(data);
+      const parsedData = JSON.parse(data);
+      dbData = { ...dbData, ...parsedData };
+      return dbData;
     } catch (error) {
       if (error.code === 'ENOENT') {
-        // Se il file non esiste, ritorna uno schema di base
-        return { users: [] };
+        // Se il file non esiste, ritorna lo schema di base
+        return dbData;
       }
       throw error;
     }
@@ -42,86 +46,80 @@ class Database {
   }
 
   /**
-   * Recupera tutti i record di una collezione.
-   * @param {string} collection Nome della collezione (es. 'users', 'expenses').
+   * Ottiene tutti i documenti da una collezione.
+   * @param {string} collectionName Il nome della collezione.
    * @returns {Promise<Array>}
    */
-  static async getAll(collection) {
+  static async getAll(collectionName) {
     const data = await this.readData();
-    return data[collection] || [];
+    return data[collectionName] || [];
   }
 
   /**
-   * Recupera un singolo record per ID.
-   * @param {string} collection Nome della collezione.
-   * @param {string} id L'ID del record.
+   * Ottiene un documento per ID da una collezione.
+   * @param {string} collectionName Il nome della collezione.
+   * @param {string} id L'ID del documento.
    * @returns {Promise<Object|null>}
    */
-  static async getById(collection, id) {
-    const records = await this.getAll(collection);
-    return records.find(record => record.id === id) || null;
+  static async getById(collectionName, id) {
+    const data = await this.readData();
+    const collection = data[collectionName] || [];
+    return collection.find((item) => item.id === id) || null;
   }
 
   /**
-   * Inserisce un nuovo record in una collezione, generando un ID se assente.
-   * @param {string} collection Nome della collezione.
-   * @param {Object} item L'oggetto da inserire.
-   * @returns {Promise<Object>} L'oggetto inserito con l'ID aggiunto.
+   * Inserisce un nuovo documento in una collezione. Genera automaticamente un ID.
+   * @param {string} collectionName Il nome della collezione.
+   * @param {Object} document Il documento da inserire.
+   * @returns {Promise<Object>} Il documento inserito con l'ID.
    */
-  static async insert(collection, item) {
+  static async insert(collectionName, document) {
     const data = await this.readData();
-    if (!data[collection]) {
-      data[collection] = [];
+    if (!data[collectionName]) {
+      data[collectionName] = [];
     }
-
-    // Genera un UUID univoco usando il modulo nativo crypto di Node.js
-    const newItem = { id: crypto.randomUUID(), ...item };
-    data[collection].push(newItem);
-
+    const newDocument = { id: crypto.randomUUID(), ...document };
+    data[collectionName].push(newDocument);
     await this.writeData(data);
-    return newItem;
+    return newDocument;
   }
 
   /**
-   * Aggiorna un record esistente.
-   * @param {string} collection Nome della collezione.
-   * @param {string} id L'ID del record da aggiornare.
-   * @param {Object} updates Oggetto con le proprietà da aggiornare.
-   * @returns {Promise<Object|null>} Il record aggiornato, o null se non trovato.
+   * Aggiorna un documento esistente in una collezione.
+   * @param {string} collectionName Il nome della collezione.
+   * @param {string} id L'ID del documento da aggiornare.
+   * @param {Object} updates I campi da aggiornare.
+   * @returns {Promise<Object|null>} Il documento aggiornato, o null se non trovato.
    */
-  static async update(collection, id, updates) {
+  static async update(collectionName, id, updates) {
     const data = await this.readData();
-    if (!data[collection]) return null;
+    const collection = data[collectionName] || [];
+    const index = collection.findIndex((item) => item.id === id);
 
-    const index = data[collection].findIndex(record => record.id === id);
     if (index === -1) return null;
 
-    const updatedItem = { ...data[collection][index], ...updates, id }; // Forza a mantenere l'ID originale
-    data[collection][index] = updatedItem;
-
+    const updatedDocument = { ...collection[index], ...updates, id }; // Mantiene l'ID originale
+    data[collectionName][index] = updatedDocument;
     await this.writeData(data);
-    return updatedItem;
+    return updatedDocument;
   }
 
   /**
-   * Elimina un record per ID.
-   * @param {string} collection Nome della collezione.
-   * @param {string} id L'ID del record da eliminare.
-   * @returns {Promise<boolean>} True se eliminato, false altrimenti.
+   * Elimina un documento da una collezione.
+   * @param {string} collectionName Il nome della collezione.
+   * @param {string} id L'ID del documento da eliminare.
+   * @returns {Promise<boolean>} true se eliminato, false se non trovato.
    */
-  static async delete(collection, id) {
+  static async delete(collectionName, id) {
     const data = await this.readData();
-    if (!data[collection]) return false;
+    const collection = data[collectionName] || [];
+    const index = collection.findIndex((item) => item.id === id);
 
-    const initialLength = data[collection].length;
-    data[collection] = data[collection].filter(record => record.id !== id);
+    if (index === -1) return false;
 
-    if (data[collection].length !== initialLength) {
-      await this.writeData(data);
-      return true;
-    }
-
-    return false;
+    data[collectionName].splice(index, 1);
+    await this.writeData(data);
+    return true;
   }
 }
 

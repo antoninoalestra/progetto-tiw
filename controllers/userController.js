@@ -14,24 +14,22 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ error: 'Tutti i campi (nome, email, password) sono obbligatori.' });
     }
 
-    const data = await Database.readData();
+    const users = await Database.getAll('users');
 
     // Controlla se l'email esiste già
-    const userExists = data.users.find(user => user.email === email);
+    const userExists = users.find(user => user.email === email);
     if (userExists) {
       return res.status(400).json({ error: 'Email già in uso.' });
     }
 
-    // Crea un nuovo utente con un ID univoco
+    // Crea un nuovo utente. L'ID univoco viene generato da Database.insert.
     const newUser = {
-      id: crypto.randomUUID(),
       nome,
       email,
       password // Salvataggio della password in chiaro come richiesto per semplicità
     };
 
-    data.users.push(newUser);
-    await Database.writeData(data);
+    await Database.insert('users', newUser);
 
     res.status(201).json({ message: 'Utente registrato con successo.' });
   } catch (error) {
@@ -53,10 +51,10 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ error: 'Email e password sono obbligatorie.' });
     }
 
-    const data = await Database.readData();
+    const users = await Database.getAll('users');
 
     // Trova l'utente per email
-    const user = data.users.find(u => u.email === email);
+    const user = users.find(u => u.email === email);
 
     // Verifica le credenziali
     if (!user || user.password !== password) {

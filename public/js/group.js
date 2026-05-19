@@ -1,64 +1,164 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ID fittizio del gruppo per dimostrazione (dovrebbe essere preso dall'URL o sessione)
-    const currentGroupId = 'grp-456';
-    const form = document.getElementById('add-expense-form');
+  // 1. Estrai il groupId dalla query string dell'URL (es: group.html?id=123)
+  const urlParams = new URLSearchParams(window.location.search);
+  const groupId = urlParams.get('id');
 
-    // Carica i rimborsi all'avvio della pagina
-    loadSettlements(currentGroupId);
+  // Elementi DOM
+  const groupTitle = document.getElementById('group-title');
+  const payerSelect = document.getElementById('payer');
+  const expensesList = document.getElementById('expenses-list');
+  const addExpenseForm = document.getElementById('add-expense-form');
+  const expenseMessage = document.getElementById('expense-message');
+  const backToDashboard = document.getElementById('backToDashboard');
 
-    // Gestione mockata dell'aggiunta spesa
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
+  // Gestione pulsante indietro (mockato a index.html o dashboard.html a seconda del progetto)
+  backToDashboard.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = 'dashboard.html'; // Supponendo che la dashboard si chiami dashboard.html
+  });
 
-        // In una vera app, qui faresti una POST al server per salvare la spesa
-        console.log("Mock: Spesa inserita");
+  if (!groupId) {
+    groupTitle.textContent = 'Errore: ID Gruppo mancante.';
+    expensesList.innerHTML = '<p>Impossibile caricare le spese.</p>';
+    return;
+  }
 
-        // Subito dopo aver inserito la spesa, si ricalcolano e si mostrano i nuovi saldi
-        loadSettlements(currentGroupId);
-        form.reset();
-        alert("Spesa simulata inserita! I rimborsi sono stati aggiornati.");
-    });
-});
+  // Mappa globale per salvare i nomi degli utenti (per mostrare chi ha pagato nello storico)
+  const usersMap = {};
 
-/**
- * Funzione che effettua una fetch al server per ottenere i rimborsi ottimizzati
- * e aggiorna il DOM.
- * @param {string} groupId - L'ID del gruppo
- */
-async function loadSettlements(groupId) {
-    const listElement = document.getElementById('settlements-list');
-    listElement.innerHTML = '<li class="empty-message">Caricamento in corso...</li>';
+  /**
+   * Carica i dettagli del gruppo e popola la select dei membri.
+   */
+  async function loadGroupDetails() {
+    try {
+      const response = await fetch(`/api/groups/${groupId}`);
+      if (!response.ok) {
+        throw new Error('Errore nel recupero del gruppo.');
+      }
+      const group = await response.json();
+
+      // Imposta il titolo con il nome del gruppo
+      groupTitle.textContent = group.name || 'Dettaglio Gruppo';
+
+      // Svuota la select (mantieni solo la prima option vuota)
+      payerSelect.innerHTML = '<option value="">-- Seleziona un membro --</option>';
+
+      // Popola la select e la mappa degli utenti
+      if (group.members && group.members.length > 0) {
+        group.members.forEach(member => {
+          // Salva nella mappa
+          usersMap[member.id] = member.nome;
+
+          // Crea option per la select
+          const option = document.createElement('option');
+          option.value = member.id;
+          option.textContent = member.nome;
+          payerSelect.appendChild(option);
+        });
+      } else {
+        payerSelect.innerHTML = '<option value="">-- Nessun membro nel gruppo --</option>';
+      }
+    } catch (error) {
+      console.error(error);
+      groupTitle.textContent = 'Errore durante il caricamento del gruppo.';
+    }
+  }
+
+  /**
+   * Carica e mostra lo storico delle spese del gruppo.
+   */
+  async function loadExpenses() {
+    try {
+      const response = await fetch(`/api/expenses/group/${groupId}`);
+      if (!response.ok) {
+        throw new Error('Errore nel recupero delle spese.');
+      }
+      const expenses = await response.json();
+
+      expensesList.innerHTML = ''; // Svuota il contenitore
+
+      if (expenses.length === 0) {
+        expensesList.innerHTML = '<p>Nessuna spesa registrata per questo gruppo.</p>';
+        return;
+      }
+
+      // Cicla ogni spesa e crea l'HTML
+      expenses.forEach(expense => {
+        const expenseDiv = document.createElement('div');
+        expenseDiv.className = 'expense-item';
+
+        // Recupera il nome del pagatore dalla mappa
+        const payerName = usersMap[expense.payerId] || 'Utente Sconosciuto';
+        const dateStr = new Date(expense.date).toLocaleDateString('it-IT');
+
+        expenseDiv.innerHTML = `
+          <strong>${expense.description}</strong> - &euro;${parseFloat(expense.amount).toFixed(2)}<br>
+          <small>Pagato da: ${payerName} in data ${dateStr}</small>
+        `;
+        expensesList.appendChild(expenseDiv);
+      });
+    } catch (error) {
+      console.error(error);
+      expensesList.innerHTML = '<p>Errore nel caricamento delle spese.</p>';
+    }
+  }
+
+  /**
+   * Gestisce il submit del form per aggiungere una nuova spesa.
+   */
+  addExpenseForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    expenseMessage.textContent = '';
+    expenseMessage.style.color = 'red';
+
+    const description = document.getElementById('description').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    const payerId = document.getElementById('payer').value;
+
+    if (!description || isNaN(amount) || !payerId) {
+      expenseMessage.textContent = 'Compila tutti i campi correttamente.';
+      return;
+    }
 
     try {
-        const response = await fetch(`/api/groups/${groupId}/settlements`);
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          groupId,
+          description,
+          amount,
+          payerId
+        })
+      });
 
-        if (!response.ok) {
-            throw new Error(`Errore HTTP: ${response.status}`);
-        }
+      const result = await response.json();
 
-        const settlements = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Errore durante l\'aggiunta della spesa.');
+      }
 
-        // Pulisci la lista
-        listElement.innerHTML = '';
+      expenseMessage.style.color = 'green';
+      expenseMessage.textContent = 'Spesa aggiunta con successo!';
 
-        if (settlements.length === 0) {
-            listElement.innerHTML = '<li class="empty-message">Tutti i conti sono in pareggio! Nessun rimborso necessario.</li>';
-            return;
-        }
+      // Resetta il form
+      addExpenseForm.reset();
 
-        // Itera sull'array e crea gli elementi DOM
-        for (const settlement of settlements) {
-            const li = document.createElement('li');
-            // Formatta l'importo per mostrare sempre 2 decimali
-            const amountFormatted = parseFloat(settlement.amount).toFixed(2);
-
-            // Crea la stringa es: "Marco deve 15.50€ a Giulia"
-            li.textContent = `${settlement.debtorName} deve ${amountFormatted}€ a ${settlement.creditorName}`;
-            listElement.appendChild(li);
-        }
-
+      // Ricarica la lista delle spese per visualizzare quella nuova
+      await loadExpenses();
     } catch (error) {
-        console.error("Errore durante il caricamento dei rimborsi:", error);
-        listElement.innerHTML = '<li class="empty-message" style="color: red;">Impossibile caricare i rimborsi al momento.</li>';
+      console.error(error);
+      expenseMessage.textContent = error.message;
     }
-}
+  });
+
+  // Inizializza la pagina
+  async function init() {
+    await loadGroupDetails();
+    await loadExpenses();
+  }
+
+  init();
+});
