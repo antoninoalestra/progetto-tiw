@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Gestione Spese di Gruppo</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Dashboard</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
+
+  <main>
+    <section id="create-group-section">
+      <h2>Crea un nuovo gruppo</h2>
+      <form id="createGroupForm">
+        <label for="groupName">Nome del gruppo:</label>
+        <input type="text" id="groupName" name="groupName" required>
+        <button type="submit">Crea Gruppo</button>
+      </form>
+    </section>
+
+    <section id="my-groups-section">
+      <h2>I miei gruppi</h2>
+      <div id="groups-list">
+        <!-- I gruppi verranno generati qui dinamicamente tramite JS -->
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/dashboard.js" type="module"></script>
+</body>
+</html>

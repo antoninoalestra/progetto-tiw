@@ -1,16 +1,20 @@
 {
   "users": [
     {
-      "id": "f008538b-b515-4abf-ae38-1f931eda150c",
+      "id": "9e615533-e27c-4833-8299-fbad2f3b2c19",
       "nome": "Test User",
       "email": "test@example.com",
       "password": "password123"
-    },
+    }
+  ],
+  "groups": [
     {
-      "id": "b363929a-be49-4e00-857c-2a2ed923241f",
-      "nome": "Test User",
-      "email": "test-ui@example.com",
-      "password": "password123"
+      "id": "d1a368ef-a06c-4384-b251-5ef1487b5165",
+      "name": "My First Group",
+      "creatorId": "9e615533-e27c-4833-8299-fbad2f3b2c19",
+      "members": [
+        "9e615533-e27c-4833-8299-fbad2f3b2c19"
+      ]
     }
   ]
 }

@@ -16,11 +16,15 @@ class Database {
   static async readData() {
     try {
       const data = await fs.readFile(dbPath, 'utf8');
-      return JSON.parse(data);
+      const parsedData = JSON.parse(data);
+      if (!parsedData.groups) {
+        parsedData.groups = [];
+      }
+      return parsedData;
     } catch (error) {
       if (error.code === 'ENOENT') {
         // Se il file non esiste, ritorna uno schema di base
-        return { users: [] };
+        return { users: [], groups: [] };
       }
       throw error;
     }

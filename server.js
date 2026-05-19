@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import userRoutes from './routes/users.js';
+import groupRoutes from './routes/groups.js';
 
 // Setup per ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -18,6 +19,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Monta il router degli utenti sotto '/api/users'
 app.use('/api/users', userRoutes);
+
+// Monta il router dei gruppi sotto '/api/groups'
+app.use('/api/groups', groupRoutes);
 
 // Route principale che reindirizza al login
 app.get('/', (req, res) => {
