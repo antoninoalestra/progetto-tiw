@@ -14,6 +14,18 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ error: 'Tutti i campi (nome, email, password) sono obbligatori.' });
     }
 
+    if (nome.trim().length < 2) {
+      return res.status(400).json({ error: 'Il nome deve avere almeno 2 caratteri.' });
+    }
+
+    if (!email.includes('@')) {
+      return res.status(400).json({ error: 'Inserisci un indirizzo email valido.' });
+    }
+
+    if (password.trim().length < 4) {
+      return res.status(400).json({ error: 'La password deve avere almeno 4 caratteri.' });
+    }
+
     const users = await Database.getAll('users');
 
     // Controlla se l'email esiste già

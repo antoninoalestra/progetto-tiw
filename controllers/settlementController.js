@@ -10,13 +10,13 @@ export const addSettlement = async (req, res) => {
     const { groupId, payerId, payeeId, amount } = req.body;
 
     // Validazione dei dati di base
-    if (!groupId || !payerId || !payeeId) {
-      return res.status(400).json({ error: 'I campi groupId, payerId e payeeId sono obbligatori.' });
+    if (!groupId || !payerId || !payeeId || amount === undefined || amount === null) {
+      return res.status(400).json({ error: 'I campi groupId, payerId, payeeId e amount sono obbligatori.' });
     }
 
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      return res.status(400).json({ error: 'L\'importo (amount) deve essere un numero maggiore di zero.' });
+      return res.status(400).json({ error: 'L\'importo del rimborso deve essere un numero maggiore di zero.' });
     }
 
     // Creazione del rimborso da inserire nel DB
