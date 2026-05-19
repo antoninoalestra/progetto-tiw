@@ -73,6 +73,34 @@
     button[type="submit"]:hover {
       background-color: #0056b3;
     }
+
+    /* Stile per i bottoni "Salda" */
+    .settle-btn {
+      padding: 5px 10px;
+      margin-left: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .settle-btn:hover {
+      background-color: #218838;
+    }
+
+    .settlement-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .settlement-item:last-child {
+      border-bottom: none;
+    }
   </style>
 </head>
 <body>
@@ -111,6 +139,22 @@
         <h2>Storico Spese</h2>
         <div id="expenses-list">
           <p>Caricamento spese...</p>
+        </div>
+      </div>
+
+      <!-- Sezione 3: Rimborsi Suggeriti -->
+      <div class="group-section">
+        <h2>Rimborsi Suggeriti</h2>
+        <div id="suggested-settlements-list">
+          <p>Nessun rimborso da calcolare al momento.</p>
+        </div>
+      </div>
+
+      <!-- Sezione 4: Storico Rimborsi -->
+      <div class="group-section">
+        <h2>Storico Rimborsi</h2>
+        <div id="past-settlements-list">
+          <p>Nessun rimborso effettuato finora.</p>
         </div>
       </div>
     </div>
