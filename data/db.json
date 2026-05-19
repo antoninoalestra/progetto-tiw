@@ -1,16 +1,47 @@
 {
   "users": [
     {
-      "id": "f008538b-b515-4abf-ae38-1f931eda150c",
-      "nome": "Test User",
-      "email": "test@example.com",
-      "password": "password123"
+      "id": "u1",
+      "nome": "Marco",
+      "email": "marco@example.com",
+      "password": "pwd"
     },
     {
-      "id": "b363929a-be49-4e00-857c-2a2ed923241f",
-      "nome": "Test User",
-      "email": "test-ui@example.com",
-      "password": "password123"
+      "id": "u2",
+      "nome": "Giulia",
+      "email": "giulia@example.com",
+      "password": "pwd"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "name": "Vacanze Roma",
+      "creatorId": "u1",
+      "members": [
+        "u1",
+        "u2"
+      ]
+    }
+  ],
+  "expenses": [
+    {
+      "id": "7a545748-6e38-4a16-b12d-c2b5ddec01d4",
+      "groupId": "g1",
+      "description": "Cena",
+      "amount": 50,
+      "payerId": "u1",
+      "date": "2026-05-19T10:04:04.368Z",
+      "splits": [
+        {
+          "userId": "u1",
+          "amountOwed": 25
+        },
+        {
+          "userId": "u2",
+          "amountOwed": 25
+        }
+      ]
     }
   ]
 }
