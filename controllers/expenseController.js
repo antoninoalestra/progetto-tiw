@@ -10,8 +10,16 @@ export const addExpense = async (req, res) => {
     const { groupId, description, amount, payerId } = req.body;
 
     // Validazione dei campi in ingresso
-    if (!groupId || !description || typeof amount !== 'number' || !payerId) {
-      return res.status(400).json({ error: 'Tutti i campi (groupId, description, amount, payerId) sono obbligatori e amount deve essere un numero.' });
+    if (!groupId || !description || amount === undefined || amount === null || !payerId) {
+      return res.status(400).json({ error: 'Tutti i campi (groupId, description, amount, payerId) sono obbligatori.' });
+    }
+
+    if (description.trim().length < 2) {
+      return res.status(400).json({ error: 'La descrizione della spesa deve avere almeno 2 caratteri.' });
+    }
+
+    if (typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({ error: 'L\'importo della spesa deve essere un numero maggiore di zero.' });
     }
 
     // Recupera il gruppo corrispondente

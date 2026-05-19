@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <div class="form-container">
-    <h2>Registrazione</h2>
-    <div id="errorMsg" class="error-message"></div>
+  <div class="auth-wrapper">
+    <div class="form-container">
+      <h2>Registrazione</h2>
     <form id="registerForm">
       <label for="nome">Nome:</label>
       <input type="text" id="nome" name="nome" required>
@@ -22,10 +22,12 @@
 
       <button type="submit">Registrati</button>
     </form>
-    <div class="links">
-      Hai già un account? <a href="login.html">Accedi qui</a>
+      <div class="links">
+        Hai già un account? <a href="login.html">Accedi qui</a>
+      </div>
     </div>
   </div>
+  <script src="../js/utils.js"></script>
   <script src="../js/auth.js" type="module"></script>
 </body>
 </html>

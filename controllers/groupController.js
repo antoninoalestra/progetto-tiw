@@ -10,6 +10,10 @@ export const getGroupById = async (req, res) => {
   try {
     const { groupId } = req.params;
 
+    if (!groupId) {
+      return res.status(400).json({ error: 'L\'ID del gruppo è obbligatorio.' });
+    }
+
     // Recupera il gruppo dal database
     const group = await Database.getById('groups', groupId);
 
@@ -49,6 +53,10 @@ export const getGroupById = async (req, res) => {
 export const getGroupSettlements = async (req, res) => {
   try {
     const { groupId } = req.params;
+
+    if (!groupId) {
+      return res.status(400).json({ error: 'L\'ID del gruppo è obbligatorio.' });
+    }
 
     // Recupera tutte le spese
     const allExpenses = await Database.getAll('expenses');
