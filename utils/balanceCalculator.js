@@ -1,9 +1,10 @@
 /**
- * Calcola i saldi netti di ogni utente a partire da un array di spese.
+ * Calcola i saldi netti di ogni utente a partire da un array di spese e un array di rimborsi (settlements).
  * @param {Array} expenses - L'array di spese.
+ * @param {Array} [settlements=[]] - L'array di rimborsi (opzionale, default []).
  * @returns {Object} Un oggetto (mappa) dove le chiavi sono gli ID utente e i valori sono i saldi netti (positivi per i creditori, negativi per i debitori).
  */
-export function calculateNetBalances(expenses) {
+export function calculateNetBalances(expenses, settlements = []) {
     const balances = {};
 
     for (const expense of expenses) {
@@ -20,6 +21,21 @@ export function calculateNetBalances(expenses) {
             }
             balances[split.userId] -= parseFloat(split.amountOwed);
         }
+    }
+
+    // Calcola l'effetto dei rimborsi (settlements)
+    for (const settlement of settlements) {
+        // Il debitore che paga (payerId) riceve un (+) sul suo saldo netto
+        if (!balances[settlement.payerId]) {
+            balances[settlement.payerId] = 0;
+        }
+        balances[settlement.payerId] += parseFloat(settlement.amount);
+
+        // Il creditore che riceve (payeeId) riceve un (-) sul suo saldo netto
+        if (!balances[settlement.payeeId]) {
+            balances[settlement.payeeId] = 0;
+        }
+        balances[settlement.payeeId] -= parseFloat(settlement.amount);
     }
 
     // Arrotonda tutti i saldi a 2 decimali

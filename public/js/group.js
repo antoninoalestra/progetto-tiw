@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const addExpenseForm = document.getElementById('add-expense-form');
   const expenseMessage = document.getElementById('expense-message');
   const backToDashboard = document.getElementById('backToDashboard');
+  const suggestedSettlementsList = document.getElementById('suggested-settlements-list');
+  const pastSettlementsList = document.getElementById('past-settlements-list');
 
   // Gestione pulsante indietro (mockato a index.html o dashboard.html a seconda del progetto)
   backToDashboard.addEventListener('click', (e) => {
@@ -148,16 +150,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Ricarica la lista delle spese per visualizzare quella nuova
       await loadExpenses();
+      // Ricarica anche i rimborsi poiché una nuova spesa cambia i saldi
+      await loadSettlements();
     } catch (error) {
       console.error(error);
       expenseMessage.textContent = error.message;
     }
   });
 
+  /**
+   * Carica i rimborsi suggeriti e lo storico dei rimborsi dal server.
+   */
+  async function loadSettlements() {
+    try {
+      const response = await fetch(`/api/groups/${groupId}/settlements`);
+      if (!response.ok) {
+        throw new Error('Errore nel recupero dei rimborsi.');
+      }
+      const data = await response.json();
+
+      const suggested = data.suggestedSettlements || [];
+      const past = data.pastSettlements || [];
+
+      // Rendi l'HTML dei rimborsi suggeriti
+      suggestedSettlementsList.innerHTML = '';
+      if (suggested.length === 0) {
+        suggestedSettlementsList.innerHTML = '<p>Tutti i conti sono saldati!</p>';
+      } else {
+        suggested.forEach(settlement => {
+          const debtorName = usersMap[settlement.debtorId] || 'Utente Sconosciuto';
+          const creditorName = usersMap[settlement.creditorId] || 'Utente Sconosciuto';
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'settlement-item';
+
+          itemDiv.innerHTML = `
+            <span><strong>${debtorName}</strong> deve &euro;${parseFloat(settlement.amount).toFixed(2)} a <strong>${creditorName}</strong></span>
+            <button class="settle-btn"
+              data-debtor-id="${settlement.debtorId}"
+              data-creditor-id="${settlement.creditorId}"
+              data-amount="${settlement.amount}">Salda</button>
+          `;
+
+          suggestedSettlementsList.appendChild(itemDiv);
+        });
+
+        // Aggiungi event listener a tutti i bottoni "Salda"
+        const settleButtons = document.querySelectorAll('.settle-btn');
+        settleButtons.forEach(btn => {
+          btn.addEventListener('click', handleSettleClick);
+        });
+      }
+
+      // Rendi l'HTML dello storico rimborsi
+      pastSettlementsList.innerHTML = '';
+      if (past.length === 0) {
+        pastSettlementsList.innerHTML = '<p>Nessun rimborso effettuato finora.</p>';
+      } else {
+        past.forEach(settlement => {
+          const payerName = usersMap[settlement.payerId] || 'Utente Sconosciuto';
+          const payeeName = usersMap[settlement.payeeId] || 'Utente Sconosciuto';
+          const dateStr = settlement.date ? new Date(settlement.date).toLocaleDateString('it-IT') : 'Data sconosciuta';
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'expense-item';
+          itemDiv.innerHTML = `
+            <strong>${payerName}</strong> ha pagato &euro;${parseFloat(settlement.amount).toFixed(2)} a <strong>${payeeName}</strong><br>
+            <small>Data: ${dateStr}</small>
+          `;
+
+          pastSettlementsList.appendChild(itemDiv);
+        });
+      }
+
+    } catch (error) {
+      console.error(error);
+      suggestedSettlementsList.innerHTML = '<p>Errore nel caricamento dei rimborsi suggeriti.</p>';
+      pastSettlementsList.innerHTML = '<p>Errore nel caricamento dello storico rimborsi.</p>';
+    }
+  }
+
+  /**
+   * Gestisce il click sul bottone "Salda".
+   */
+  async function handleSettleClick(e) {
+    const btn = e.target;
+    const payerId = btn.getAttribute('data-debtor-id');
+    const payeeId = btn.getAttribute('data-creditor-id');
+    const amount = btn.getAttribute('data-amount');
+
+    try {
+      const response = await fetch('/api/settlements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          groupId,
+          payerId,
+          payeeId,
+          amount
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Errore durante la registrazione del rimborso.');
+      }
+
+      // Ricarica la lista dei rimborsi per aggiornare la UI
+      await loadSettlements();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
   // Inizializza la pagina
   async function init() {
     await loadGroupDetails();
     await loadExpenses();
+    await loadSettlements();
   }
 
   init();
