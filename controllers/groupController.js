@@ -1,51 +1,40 @@
 import Database from '../models/Database.js';
-import { calculateNetBalances, optimizeSettlements } from '../utils/balanceCalculator.js';
 
 /**
- * Controller per ottenere i rimborsi calcolati (settlements) di un gruppo.
- * @param {Object} req L'oggetto richiesta Express.
- * @param {Object} res L'oggetto risposta Express.
+ * Recupera un gruppo dal suo ID, popolando le informazioni sui membri.
+ * @param {Object} req - L'oggetto richiesta di Express
+ * @param {Object} res - L'oggetto risposta di Express
  */
-export const getGroupSettlements = async (req, res) => {
-    try {
-        const { groupId } = req.params;
+export const getGroupById = async (req, res) => {
+  try {
+    const { groupId } = req.params;
 
-        // 1. Recupera tutte le spese dal database
-        const allExpenses = await Database.getAll('expenses');
+    // Recupera il gruppo dal database
+    const group = await Database.getById('groups', groupId);
 
-        // 2. Filtra le spese per il gruppo richiesto
-        const groupExpenses = allExpenses.filter(expense => expense.groupId === groupId);
-
-        if (groupExpenses.length === 0) {
-            // Se non ci sono spese, non ci sono rimborsi da fare
-            return res.status(200).json([]);
-        }
-
-        // 3. Calcola i saldi netti
-        const netBalances = calculateNetBalances(groupExpenses);
-
-        // 4. Ottimizza i rimborsi tramite l'algoritmo greedy
-        const settlements = optimizeSettlements(netBalances);
-
-        // 5. Recupera gli utenti per tradurre ID in nomi
-        const allUsers = await Database.getAll('users');
-        const usersMap = {};
-        for (const user of allUsers) {
-            usersMap[user.id] = user.name || user.username || user.email || user.id; // Fallback in caso di mancanza del nome
-        }
-
-        // 6. Arricchisce i risultati coi nomi veri degli utenti
-        const finalSettlements = settlements.map(settlement => ({
-            debtorName: usersMap[settlement.debtorId] || settlement.debtorId,
-            creditorName: usersMap[settlement.creditorId] || settlement.creditorId,
-            amount: settlement.amount
-        }));
-
-        // 7. Risposta al client
-        res.status(200).json(finalSettlements);
-
-    } catch (error) {
-        console.error('Errore durante il calcolo dei rimborsi del gruppo:', error);
-        res.status(500).json({ error: 'Errore interno del server durante il calcolo dei rimborsi.' });
+    if (!group) {
+      return res.status(404).json({ error: 'Gruppo non trovato.' });
     }
+
+    // Recupera tutti gli utenti per popolare le info dei membri del gruppo
+    const allUsers = await Database.getAll('users');
+
+    // Popola l'array members
+    const populatedMembers = group.members.map(memberId => {
+      const user = allUsers.find(u => u.id === memberId);
+      // Se l'utente non viene trovato, restituiamo un utente mockato
+      return user ? { id: user.id, nome: user.nome } : { id: memberId, nome: 'Utente Sconosciuto' };
+    });
+
+    // Crea un nuovo oggetto gruppo con i membri popolati
+    const populatedGroup = {
+      ...group,
+      members: populatedMembers
+    };
+
+    res.status(200).json(populatedGroup);
+  } catch (error) {
+    console.error('Errore durante il recupero del gruppo:', error);
+    res.status(500).json({ error: 'Errore interno del server.' });
+  }
 };

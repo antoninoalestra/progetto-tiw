@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import userRoutes from './routes/users.js';
 import groupRoutes from './routes/groups.js';
+import expenseRoutes from './routes/expenses.js';
 
 // Setup per ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -22,6 +23,9 @@ app.use('/api/users', userRoutes);
 
 // Monta il router dei gruppi sotto '/api/groups'
 app.use('/api/groups', groupRoutes);
+
+// Monta il router delle spese sotto '/api/expenses'
+app.use('/api/expenses', expenseRoutes);
 
 // Route principale che reindirizza al login
 app.get('/', (req, res) => {
