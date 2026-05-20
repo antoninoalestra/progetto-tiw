@@ -338,7 +338,8 @@ export const exportGroupPdf = async (req, res) => {
          
          doc.fillColor('#334155');
          doc.text(date, marginX + 10, rowY);
-         doc.text(exp.description, marginX + 100, rowY, { width: 200, lineBreak: false });
+         const catStr = exp.category ? `[${exp.category}] ` : '';
+         doc.text(catStr + exp.description, marginX + 100, rowY, { width: 200, lineBreak: false });
          doc.text(payer, marginX + 320, rowY);
          doc.fillColor('#ef4444').font('Helvetica-Bold').text(`€ ${exp.amount.toFixed(2)}`, doc.page.width - marginX - 70, rowY, { width: 60, align: 'right' });
          

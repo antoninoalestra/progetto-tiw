@@ -1274,3 +1274,9 @@ input:focus, select:focus {
     display: flex !important;
   }
 }
+
+/* Fix per menu a tendina nel tema scuro */
+select option {
+  background-color: var(--surface-color);
+  color: var(--text-main);
+}

@@ -7,12 +7,15 @@ import Database from '../models/Database.js';
  */
 export const addExpense = async (req, res) => {
   try {
-    const { groupId, description, amount, payerId, requesterId, participantsId } = req.body;
+    const { groupId, description, amount, payerId, requesterId, participantsId, category } = req.body;
 
     // Validazione dei campi in ingresso
     if (!groupId || !description || amount === undefined || amount === null || !payerId || !requesterId) {
       return res.status(400).json({ error: 'Tutti i campi (incluso requesterId) sono obbligatori.' });
     }
+    
+    // Categoria predefinita se non specificata
+    const expenseCategory = category || 'Generale';
 
     if (requesterId !== payerId) {
       return res.status(403).json({ error: 'Operazione negata. Puoi registrare solo spese da te effettuate.' });
@@ -65,6 +68,7 @@ export const addExpense = async (req, res) => {
       description,
       amount,
       payerId,
+      category: expenseCategory,
       date: new Date().toISOString(),
       splits
     };

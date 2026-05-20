@@ -72,6 +72,17 @@
         "u1",
         "u2"
       ]
+    },
+    {
+      "id": "50c2a0c3-2d9b-4af5-bd67-16650fd8a6b7",
+      "name": "Residenza ELIS",
+      "creatorId": "u1",
+      "adminId": "u1",
+      "inviteCode": "C1YTWT",
+      "members": [
+        "u1",
+        "u3"
+      ]
     }
   ],
   "expenses": [
@@ -160,6 +171,52 @@
         {
           "userId": "u3",
           "amountOwed": 25
+        }
+      ]
+    },
+    {
+      "id": "796611d2-a350-4904-8c8f-ad0552696432",
+      "groupId": "g1",
+      "description": "Cena",
+      "amount": 240,
+      "payerId": "u1",
+      "category": "Cibo",
+      "date": "2026-05-20T14:30:46.065Z",
+      "splits": [
+        {
+          "userId": "u1",
+          "amountOwed": 80
+        },
+        {
+          "userId": "u2",
+          "amountOwed": 80
+        },
+        {
+          "userId": "u3",
+          "amountOwed": 80
+        }
+      ]
+    },
+    {
+      "id": "b8e4f369-e1cc-4fb2-9f9a-5714f211447d",
+      "groupId": "g1",
+      "description": "Gas",
+      "amount": 50,
+      "payerId": "u3",
+      "category": "Alloggio",
+      "date": "2026-05-20T14:33:56.641Z",
+      "splits": [
+        {
+          "userId": "u1",
+          "amountOwed": 16.67
+        },
+        {
+          "userId": "u2",
+          "amountOwed": 16.67
+        },
+        {
+          "userId": "u3",
+          "amountOwed": 16.67
         }
       ]
     }

@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentGroup = null;
     let usersMap = {}; // Mappa: ID -> {nome, cognome}
+    let expenseChart = null; // Variabile per mantenere l'istanza del grafico
 
     // Helper per l'Avatar
     function getAvatarHtml(nome, cognome) {
@@ -224,6 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const description = descInput.value.trim();
         const amount = parseFloat(amountInput.value);
+        const categoryInput = document.getElementById('category');
+        const category = categoryInput ? categoryInput.value : 'Generale';
 
         if (!description || description.length < 2) {
             descInput.classList.add('input-error');
@@ -250,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 amount,
                 payerId: loggedUser.id,
                 requesterId: loggedUser.id,
-                participantsId
+                participantsId,
+                category
             };
 
             const response = await fetch('/api/expenses', {
@@ -294,6 +298,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const template = document.getElementById('expense-item-template');
                 const clone = template.content.cloneNode(true);
                 
+                const catIcons = {
+                    'Generale': '🏷️',
+                    'Cibo': '🍔',
+                    'Trasporti': '🚗',
+                    'Alloggio': '🏠',
+                    'Svago': '🎟️',
+                    'Spesa': '🛒'
+                };
+                const icon = catIcons[exp.category] || '🏷️';
+                clone.querySelector('.expense-row-icon').innerHTML = `<span style="font-size: 1.3rem;">${icon}</span>`;
+                
                 clone.querySelector('.tpl-desc').textContent = exp.description;
                 clone.querySelector('.tpl-amount').innerHTML = `&euro;${parseFloat(exp.amount).toFixed(2)}`;
                 clone.querySelector('.tpl-avatar').innerHTML = avatarHtml;
@@ -301,9 +316,76 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 expensesList.appendChild(clone);
             });
+
+            // Disegna o aggiorna il Grafico
+            updateChart(expenses);
+
         } catch (error) {
             console.error(error);
         }
+    }
+
+    function updateChart(expenses) {
+        const ctx = document.getElementById('expenses-chart');
+        if (!ctx) return;
+
+        const categoryTotals = {};
+        expenses.forEach(exp => {
+            const cat = exp.category || 'Generale';
+            categoryTotals[cat] = (categoryTotals[cat] || 0) + exp.amount;
+        });
+
+        const labels = Object.keys(categoryTotals);
+        const data = Object.values(categoryTotals);
+
+        // Se non ci sono dati, non distruggo/creo ma lascio vuoto
+        if (data.length === 0 && expenseChart) {
+            expenseChart.destroy();
+            expenseChart = null;
+            return;
+        }
+
+        const colorMap = {
+            'Generale': '#94a3b8',
+            'Cibo': '#ef4444',
+            'Trasporti': '#3b82f6',
+            'Alloggio': '#8b5cf6',
+            'Svago': '#f59e0b',
+            'Spesa': '#10b981'
+        };
+        const bgColors = labels.map(l => colorMap[l] || '#cbd5e1');
+
+        if (expenseChart) {
+            expenseChart.destroy();
+        }
+
+        expenseChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: bgColors,
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#94a3b8',
+                            padding: 15,
+                            font: { family: 'Inter', size: 12 }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // ==========================================
