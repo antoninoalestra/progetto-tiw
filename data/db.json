@@ -219,6 +219,25 @@
           "amountOwed": 16.67
         }
       ]
+    },
+    {
+      "id": "58c28942-b072-46ad-ae2d-0a8142069c90",
+      "groupId": "g3",
+      "description": "Pizzeria",
+      "amount": 45,
+      "payerId": "u1",
+      "category": "Generale",
+      "date": "2026-05-20T16:48:02.830Z",
+      "splits": [
+        {
+          "userId": "u1",
+          "amountOwed": 35
+        },
+        {
+          "userId": "u2",
+          "amountOwed": 10
+        }
+      ]
     }
   ],
   "settlements": [

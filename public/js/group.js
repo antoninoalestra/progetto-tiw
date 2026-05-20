@@ -55,11 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSettlements();
     });
 
-    // Imposta bottone PDF
-    const exportPdfBtn = document.getElementById('export-pdf-btn');
-    if (exportPdfBtn) {
-        exportPdfBtn.href = `/api/groups/${groupId}/export`;
-    }
 
     // Modal Logic
     const expenseModal = document.getElementById('expense-modal');
@@ -114,11 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Titolo
             groupTitle.textContent = currentGroup.name;
 
-            // Se l'utente è l'admin, mostra il codice di invito in alto
+            // Se l'utente è l'admin, mostra funzionalità extra
             const isAdmin = currentGroup.adminId === loggedUser.id;
             if (isAdmin) {
                 inviteCodeContainer.style.display = 'flex';
                 groupInviteCode.textContent = currentGroup.inviteCode;
+                
+                const adminSection = document.getElementById('admin-section');
+                if (adminSection) adminSection.style.display = 'block';
             }
 
             // Popola Mappa Membri e renderizza lista
@@ -166,19 +164,33 @@ document.addEventListener('DOMContentLoaded', () => {
             // Popola le checkbox per i partecipanti alla spesa
             const participantsContainer = document.getElementById('participants-container');
             if (participantsContainer) {
-                let html = '<label>Chi partecipa a questa spesa?</label><div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">';
+                let html = '<label>Chi partecipa a questa spesa?</label><div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem;">';
                 currentGroup.members.forEach(member => {
                     const isMe = member.id === loggedUser.id;
                     const nomeStr = isMe ? 'Tu' : member.nome;
                     html += `
-                        <label style="display:flex; align-items:center; gap:0.3rem; background:rgba(255,255,255,0.4); padding:0.4rem 0.8rem; border-radius:12px; font-weight:normal; cursor:pointer; font-size: 0.9rem;">
-                            <input type="checkbox" name="participants" value="${member.id}" checked>
-                            ${nomeStr}
-                        </label>
+                        <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:12px; border: 1px solid var(--border-color);">
+                            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:normal; cursor:pointer; margin:0; flex-grow:1;">
+                                <input type="checkbox" name="participants" value="${member.id}" checked>
+                                ${nomeStr}
+                            </label>
+                            <input type="number" class="custom-quota-input" data-user-id="${member.id}" placeholder="€" step="0.01" min="0" style="display:none;">
+                        </div>
                     `;
                 });
                 html += '</div>';
                 participantsContainer.innerHTML = html;
+
+                const splitModeSelect = document.getElementById('splitMode');
+                if (splitModeSelect) {
+                    splitModeSelect.addEventListener('change', (e) => {
+                        const isCustom = e.target.value === 'custom';
+                        document.querySelectorAll('.custom-quota-input').forEach(input => {
+                            input.style.display = isCustom ? 'block' : 'none';
+                            if (!isCustom) input.value = '';
+                        });
+                    });
+                }
             }
 
         } catch (error) {
@@ -246,6 +258,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const splitMode = document.getElementById('splitMode') ? document.getElementById('splitMode').value : 'equal';
+        let customSplits = null;
+
+        if (splitMode === 'custom') {
+            customSplits = [];
+            let totalCustom = 0;
+            
+            for (const cb of checkboxes) {
+                const userId = cb.value;
+                const input = document.querySelector(`.custom-quota-input[data-user-id="${userId}"]`);
+                const val = parseFloat(input.value) || 0;
+                customSplits.push({ userId, amountOwed: val });
+                totalCustom += val;
+            }
+
+            if (Math.abs(totalCustom - amount) > 0.01) {
+                window.showNotification(`La somma delle quote (€${totalCustom.toFixed(2)}) non coincide col totale (€${amount.toFixed(2)}).`, true);
+                return;
+            }
+        }
+
         try {
             const payload = {
                 groupId,
@@ -254,7 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 payerId: loggedUser.id,
                 requesterId: loggedUser.id,
                 participantsId,
-                category
+                category,
+                customSplits
             };
 
             const response = await fetch('/api/expenses', {
@@ -279,14 +313,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const eurFormatter = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
+
     async function loadExpenses() {
         try {
+            expensesList.innerHTML = `
+                <div class="skeleton-box"></div>
+                <div class="skeleton-box"></div>
+                <div class="skeleton-box"></div>
+            `;
+
             const response = await fetch(`/api/expenses/group/${groupId}`);
             const expenses = await response.json();
 
             expensesList.innerHTML = '';
             if (expenses.length === 0) {
-                expensesList.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 1rem 0;">Nessuna spesa. Aggiungine una!</p>`;
+                expensesList.innerHTML = `
+                    <div style="text-align: center; padding: 2.5rem 0; color: var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:0.8rem;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M19 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                        <p style="font-size: 0.95rem; margin:0;">Nessuna spesa. Clicca il <strong>+</strong> per iniziare!</p>
+                    </div>`;
+                updateChart([]);
                 return;
             }
 
@@ -310,9 +357,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 clone.querySelector('.expense-row-icon').innerHTML = `<span style="font-size: 1.3rem;">${icon}</span>`;
                 
                 clone.querySelector('.tpl-desc').textContent = exp.description;
-                clone.querySelector('.tpl-amount').innerHTML = `&euro;${parseFloat(exp.amount).toFixed(2)}`;
+                clone.querySelector('.tpl-amount').textContent = eurFormatter.format(exp.amount);
                 clone.querySelector('.tpl-avatar').innerHTML = avatarHtml;
                 clone.querySelector('.tpl-payer').textContent = payerObj.nome;
+                clone.querySelector('.expense-item').classList.add('fade-in-row');
                 
                 expensesList.appendChild(clone);
             });
@@ -495,4 +543,88 @@ document.addEventListener('DOMContentLoaded', () => {
             window.showNotification('Errore di connessione', true);
         }
     }
+
+    // ==========================================
+    // ADMIN E PDF
+    // ==========================================
+    const closeGroupBtn = document.getElementById('close-group-btn');
+    if (closeGroupBtn) {
+        closeGroupBtn.addEventListener('click', async () => {
+            if (!confirm('ATTENZIONE: Stai per chiudere definitivamente il gruppo. Tutte le spese e i rimborsi verranno eliminati e non potranno essere recuperati. Vuoi procedere?')) {
+                return;
+            }
+            try {
+                const response = await fetch(`/api/groups/${groupId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminId: loggedUser.id })
+                });
+
+                if (response.ok) {
+                    alert('Il gruppo è stato chiuso ed eliminato correttamente.');
+                    window.location.href = '/html/dashboard.html';
+                } else {
+                    const data = await response.json();
+                    window.showNotification(data.error || 'Errore nella chiusura', true);
+                }
+            } catch (err) {
+                console.error(err);
+                window.showNotification('Errore di rete durante la chiusura.', true);
+            }
+        });
+    }
+
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    if (exportPdfBtn) {
+        // Rimuoviamo l'href nativo perché gestiamo noi il download via POST per inviare il grafico
+        exportPdfBtn.removeAttribute('href');
+        exportPdfBtn.style.cursor = 'pointer';
+        
+        exportPdfBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const originalHtml = exportPdfBtn.innerHTML;
+            exportPdfBtn.innerHTML = '<span class="desktop-only" style="margin-left: 5px;">Generazione...</span>';
+            exportPdfBtn.style.opacity = '0.7';
+            exportPdfBtn.style.pointerEvents = 'none';
+
+            try {
+                let chartImage = null;
+                const canvas = document.getElementById('expenses-chart');
+                if (canvas) {
+                    // Cattura il grafico come immagine Base64
+                    chartImage = canvas.toDataURL('image/png');
+                }
+
+                const response = await fetch(`/api/groups/${groupId}/export`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chartImage })
+                });
+
+                if (response.ok) {
+                    // Creiamo un link per scaricare il blob binario ricevuto dal server
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Qotly_Report_${currentGroup.name.replace(/\s+/g, '_')}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    window.showNotification('Errore durante l\'esportazione del PDF', true);
+                }
+            } catch (error) {
+                console.error(error);
+                window.showNotification('Errore di rete durante l\'esportazione', true);
+            } finally {
+                exportPdfBtn.innerHTML = originalHtml;
+                exportPdfBtn.style.opacity = '1';
+                exportPdfBtn.style.pointerEvents = 'auto';
+            }
+        });
+    }
+
 });

@@ -1,10 +1,13 @@
 import express from 'express';
-import { getGroupById, getGroupSettlements, getUserGroups, createGroup, joinGroup, removeMember, exportGroupPdf } from '../controllers/groupController.js';
+import { getGroupById, getGroupSettlements, getUserGroups, createGroup, joinGroup, removeMember, exportGroupPdf, deleteGroup } from '../controllers/groupController.js';
 
 const router = express.Router();
 
-// Rotta per esportare il PDF
-router.get('/:groupId/export', exportGroupPdf);
+// Rotta per esportare il PDF (diventa POST per accettare il Base64 del grafico)
+router.post('/:groupId/export', exportGroupPdf);
+
+// Rotta per eliminare (chiudere) un gruppo
+router.delete('/:groupId', deleteGroup);
 
 // Rotta per creare un nuovo gruppo
 router.post('/', createGroup);

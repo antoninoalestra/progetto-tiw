@@ -7,7 +7,7 @@ import Database from '../models/Database.js';
  */
 export const addExpense = async (req, res) => {
   try {
-    const { groupId, description, amount, payerId, requesterId, participantsId, category } = req.body;
+    const { groupId, description, amount, payerId, requesterId, participantsId, category, customSplits } = req.body;
 
     // Validazione dei campi in ingresso
     if (!groupId || !description || amount === undefined || amount === null || !payerId || !requesterId) {
@@ -43,24 +43,33 @@ export const addExpense = async (req, res) => {
       return res.status(400).json({ error: 'Il gruppo non ha membri.' });
     }
 
-    // Identifica chi partecipa alla spesa (default tutti)
-    let activeParticipants = members;
-    if (participantsId && Array.isArray(participantsId) && participantsId.length > 0) {
-      activeParticipants = participantsId;
+    let splits = [];
+
+    if (customSplits && Array.isArray(customSplits) && customSplits.length > 0) {
+      // Validazione server-side delle quote manuali
+      const totalCustom = customSplits.reduce((sum, split) => sum + split.amountOwed, 0);
+      if (Math.abs(totalCustom - amount) > 0.05) {
+        return res.status(400).json({ error: 'La somma delle quote personalizzate non corrisponde al totale della spesa.' });
+      }
+      splits = customSplits;
+    } else {
+      // Divisione equa
+      let activeParticipants = members;
+      if (participantsId && Array.isArray(participantsId) && participantsId.length > 0) {
+        activeParticipants = participantsId;
+      }
+
+      if (activeParticipants.length === 0) {
+        return res.status(400).json({ error: 'Nessun partecipante valido per questa spesa.' });
+      }
+
+      const splitAmount = parseFloat((amount / activeParticipants.length).toFixed(2));
+
+      splits = activeParticipants.map(memberId => ({
+        userId: memberId,
+        amountOwed: splitAmount
+      }));
     }
-
-    if (activeParticipants.length === 0) {
-      return res.status(400).json({ error: 'Nessun partecipante valido per questa spesa.' });
-    }
-
-    // Calcola la divisione in parti uguali tra chi partecipa
-    const splitAmount = parseFloat((amount / activeParticipants.length).toFixed(2));
-
-    // Genera l'array di divisione (splits)
-    const splits = activeParticipants.map(memberId => ({
-      userId: memberId,
-      amountOwed: splitAmount
-    }));
 
     // Costruisci l'oggetto spesa
     const newExpense = {

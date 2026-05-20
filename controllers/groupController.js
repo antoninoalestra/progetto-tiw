@@ -243,6 +243,7 @@ export const removeMember = async (req, res) => {
 export const exportGroupPdf = async (req, res) => {
   try {
     const { groupId } = req.params;
+    const { chartImage } = req.body;
     const group = await Database.getById('groups', groupId);
     if (!group) return res.status(404).json({ error: 'Gruppo non trovato.' });
 
@@ -301,7 +302,9 @@ export const exportGroupPdf = async (req, res) => {
     doc.fillColor('#64748b').fontSize(11).text('DATA EMISSIONE', marginX + 370, summaryY);
     doc.fillColor('#0f172a').fontSize(16).text(`${new Date().toLocaleDateString('it-IT')}`, marginX + 370, summaryY + 25);
 
-    doc.y += 110;
+    doc.y = summaryY + 80;
+
+    doc.y += 40;
 
     // --- SPESE TABLE ---
     doc.fontSize(16).fillColor('#0f172a').font('Helvetica-Bold').text('Dettaglio Spese', marginX, doc.y);
@@ -411,5 +414,50 @@ export const exportGroupPdf = async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: 'Errore durante la generazione del PDF' });
     }
+  }
+};
+
+/**
+ * Elimina (Chiude) un gruppo e tutte le sue associazioni.
+ * @param {Object} req - L'oggetto richiesta di Express
+ * @param {Object} res - L'oggetto risposta di Express
+ */
+export const deleteGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { adminId } = req.body;
+
+    if (!adminId) return res.status(400).json({ error: 'L\'ID amministratore è obbligatorio.' });
+
+    const group = await Database.getById('groups', groupId);
+    if (!group) return res.status(404).json({ error: 'Gruppo non trovato.' });
+
+    if (group.adminId !== adminId) {
+      return res.status(403).json({ error: 'Solo l\'amministratore può chiudere il gruppo.' });
+    }
+
+    // Cascade delete: elimina tutte le spese associate
+    const expenses = await Database.getAll('expenses');
+    for (const exp of expenses) {
+      if (exp.groupId === groupId) {
+        await Database.delete('expenses', exp.id);
+      }
+    }
+
+    // Cascade delete: elimina tutti i rimborsi associati
+    const settlements = await Database.getAll('settlements');
+    for (const s of settlements) {
+      if (s.groupId === groupId) {
+        await Database.delete('settlements', s.id);
+      }
+    }
+
+    // Infine, elimina il gruppo stesso
+    await Database.delete('groups', groupId);
+
+    res.status(200).json({ message: 'Gruppo chiuso ed eliminato con successo.' });
+  } catch (error) {
+    console.error('Errore durante l\'eliminazione del gruppo:', error);
+    res.status(500).json({ error: 'Errore interno del server.' });
   }
 };

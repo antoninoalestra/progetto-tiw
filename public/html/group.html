@@ -83,6 +83,16 @@
           </div>
         </section>
 
+        <!-- SEZIONE: Admin (Chiudi Gruppo) -->
+        <section id="admin-section" class="card" style="display: none; border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.02);">
+          <h2>Amministrazione</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">La chiusura del gruppo è irreversibile. Tutte le spese e i rimborsi verranno eliminati.</p>
+          <button id="close-group-btn" class="btn btn-logout" style="width: 100%; justify-content: center; padding: 0.7rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Chiudi Gruppo (Elimina)
+          </button>
+        </section>
+
       </div>
 
       <!-- COLONNA DESTRA (Main Content) -->
@@ -155,6 +165,12 @@
           <option value="Spesa">🛒 Spesa (Supermercato)</option>
         </select>
         
+        <label for="splitMode" style="margin-top: 0.5rem; display:block;">Modalità di Divisione:</label>
+        <select id="splitMode" style="width: 100%; margin-bottom: 0.5rem; padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-main);">
+          <option value="equal">➗ Divisione in Parti Uguali</option>
+          <option value="custom">✏️ Quote Personalizzate</option>
+        </select>
+
         <div id="participants-container" style="margin-top: 1rem;"></div>
 
         <button type="submit" style="margin-top: 1.2rem; width: 100%;">Conferma Spesa</button>

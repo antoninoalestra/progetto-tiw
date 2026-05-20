@@ -707,6 +707,8 @@ input:focus, select:focus {
 .modal-content {
   width: 90%;
   max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
   transform: scale(0.95) translateY(10px);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   background: var(--surface-color);
@@ -714,6 +716,21 @@ input:focus, select:focus {
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-lg);
   padding: 2.2rem;
+}
+
+/* Scrollbar personalizzata per le modali */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-overlay.active .modal-content {
@@ -1279,4 +1296,75 @@ input:focus, select:focus {
 select option {
   background-color: var(--surface-color);
   color: var(--text-main);
+}
+
+/* Animazioni e Skeleton Loaders */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-overlay.active .modal-content {
+  animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.skeleton-box {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  min-height: 80px;
+  margin-bottom: 0.8rem;
+}
+
+.skeleton-box::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background-image: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0) 0, 
+    rgba(255, 255, 255, 0.02) 20%, 
+    rgba(255, 255, 255, 0.06) 60%, 
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes fadeInRow {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.fade-in-row {
+  animation: fadeInRow 0.3s ease forwards;
+}
+
+/* Bottone active state */
+.btn:active, button:not(.m-tab):active {
+  transform: scale(0.97) translateY(1px) !important;
+}
+
+/* Quote custom container */
+.custom-quota-input {
+  width: 75px;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: rgba(0,0,0,0.2);
+  color: var(--text-main);
+  text-align: right;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.custom-quota-input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  background: rgba(0,0,0,0.3);
 }
