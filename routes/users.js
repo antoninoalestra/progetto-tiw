@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, updateUser, getUserBalances } from '../controllers/userController.js';
+import { registerUser, loginUser, updateUser, getUserBalances, getUserExpenses } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -14,6 +14,10 @@ router.put('/:id', updateUser);
 
 // Rotta per ottenere il riepilogo saldi dell'utente
 router.get('/:userId/balances', getUserBalances);
+
+// Rotta per ottenere le spese recenti dell'utente su tutti i gruppi
+router.get('/:userId/expenses', getUserExpenses);
+
 
 export default router;
 

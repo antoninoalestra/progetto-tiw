@@ -3,126 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Split & Pay | App</title>
+    <title>Qotly - Gestione Spese di Gruppo</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
-    <!-- HEADER RIMOSSO SU RICHIESTA -->
+<body>
+
+    <!-- TOP NAVBAR FISSA IN ALTO -->
+    <nav class="top-navbar">
+        <div class="logo">Qotly</div>
+        
+        <!-- Navigazione Principale -->
+        <ul class="nav-links" id="main-nav">
+            <li class="nav-item active" data-target="tab-home">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Dashboard</span>
+            </li>
+            <li class="nav-item" data-target="tab-groups">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>Gruppi</span>
+            </li>
+            <!-- Pulsante Nuovo che aprirà una modale invece di cambiare tab -->
+            <li class="nav-item" id="nav-btn-nuovo">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                <span>Nuovo</span>
+            </li>
+        </ul>
+
+        <div class="navbar-right">
+            <!-- Avatar dell'utente loggato (funge anche da link al profilo) -->
+            <div class="user-profile-badge nav-item" data-target="tab-profile" id="top-profile-avatar-letter" title="Profilo Utente">U</div>
+            <!-- Bottone di Logout -->
+            <button id="top-logout-btn" class="btn-logout" title="Esci dall'Account">
+                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <span class="desktop-only">Esci</span>
+            </button>
+        </div>
+    </nav>
 
     <main class="container">
         
         <!-- ============================================== -->
-        <!-- TAB 1: HOME (RESOCONTO SALDI GLOBALI) -->
+        <!-- TAB 1: HOME (DASHBOARD GLOBALE) -->
         <!-- ============================================== -->
         <section id="tab-home" class="tab-content active">
-            <!-- ================= MOBILE LAYOUT ================= -->
-            <div class="mobile-only app-header-mobile">
-                <p class="mobile-greeting">Ciao, <span class="mobile-welcome-name"></span> 👋</p>
-                <div class="mobile-balances-row">
-                    <div class="mobile-balance-pill debt-pill">
-                        <span class="pill-label">Da Dare</span>
-                        <h3 class="amount-negative" id="mobile-total-owed">&euro;0.00</h3>
-                    </div>
-                    <div class="mobile-balance-pill credit-pill">
-                        <span class="pill-label">Da Ricevere</span>
-                        <h3 class="amount-positive" id="mobile-total-credit">&euro;0.00</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mobile-only app-list-container">
-                <h4 class="section-title">Dettaglio Gruppi</h4>
-                <div id="mobile-balances-details" class="edge-to-edge-list">
-                    <!-- Inserito dinamicamente via JS -->
-                </div>
-            </div>
-
-            <!-- ================= DESKTOP LAYOUT ================= -->
+            
             <div class="desktop-only" style="margin-bottom: 2rem;">
-                <h2 style="font-size: 2.5rem; color: var(--primary-color);">Ciao, <span id="welcome-text"></span>! 👋</h2>
-                <p style="color: var(--text-muted); font-size: 1.1rem;">Bentornato nella tua dashboard.</p>
+                <h2 style="font-size: 2.2rem; font-family: var(--font-heading); font-weight: 700; margin-bottom: 0.3rem;">Ciao, <span id="welcome-text"></span>!</h2>
+                <p style="color: var(--text-muted); font-size: 1.05rem;">Bentornato nella tua dashboard finanziaria.</p>
             </div>
 
-            <div class="card desktop-only" id="balances-widget">
-                <h2 style="font-size: 2rem;">Il Tuo Portafoglio</h2>
-                <p style="color: var(--text-muted); margin-bottom: 2rem;">Un riepilogo rapido di tutti i tuoi movimenti.</p>
+            <!-- Mobile Greeting -->
+            <div class="mobile-only app-header-mobile">
+                <p class="mobile-greeting">Ciao, <span class="mobile-welcome-name"></span></p>
+            </div>
+
+            <!-- Nuovo Layout a Colonne (Applicato solo su Desktop) -->
+            <div class="dashboard-layout">
                 
-                <div id="balances-loading" style="text-align: center; padding: 2rem; color: var(--primary-color);">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></path></svg>
-                </div>
-                
-                <div id="balances-content" style="display: none;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
-                        <div style="background: rgba(239, 68, 68, 0.1); border-radius: 20px; padding: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.2);">
-                            <p style="font-size: 0.9rem; color: var(--error-color); font-weight: 600;">Totale Debiti</p>
-                            <h3 class="amount-negative" id="total-owed" style="font-size: 2rem; margin-top: 0.5rem;">&euro;0.00</h3>
+                <!-- COLONNA SINISTRA: Sidebar Bilancio Netto -->
+                <div class="sidebar">
+                    <div class="net-balance-card">
+                        <span class="net-balance-label">Bilancio Netto</span>
+                        <h1 id="net-balance-value" class="net-balance-amount" style="font-size: clamp(2rem, 5vw, 3.2rem);">€0.00</h1>
+                        
+                        <div class="balance-sub-row" style="flex-direction: column; background: transparent; padding: 0; border: none; align-items: stretch; gap: 1rem;">
+                            <!-- Da Dare -->
+                            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02);">
+                                <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Da Dare</span>
+                                <strong class="amount-negative" id="total-owed" style="display: block; font-size: 1.5rem; margin-top: 0.3rem;">€0.00</strong>
+                            </div>
+                            <!-- Da Ricevere -->
+                            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02);">
+                                <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Da Ricevere</span>
+                                <strong class="amount-positive" id="total-credit" style="display: block; font-size: 1.5rem; margin-top: 0.3rem;">€0.00</strong>
+                            </div>
                         </div>
-                        <div style="background: rgba(16, 185, 129, 0.1); border-radius: 20px; padding: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.2);">
-                            <p style="font-size: 0.9rem; color: var(--success-color); font-weight: 600;">Totale Crediti</p>
-                            <h3 class="amount-positive" id="total-credit" style="font-size: 2rem; margin-top: 0.5rem;">&euro;0.00</h3>
+                        
+                        <div class="balance-actions">
+                            <button id="settle-up-cta" class="btn btn-settle-up" style="width: 100%;">Settle Up Rapido</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- COLONNA DESTRA: Contenuto Principale -->
+                <div class="main-content" style="display: flex; flex-direction: column; gap: 2rem;">
                     
-                    <h4 style="margin-bottom: 1rem; color: var(--text-main);">Dettagli per Gruppo</h4>
-                    <div id="balances-details" style="max-height: 350px; overflow-y: auto; padding-right: 0.5rem;">
-                        <!-- Inserito dinamicamente -->
+                    <!-- Spese Recenti -->
+                    <div class="card">
+                        <h3>Spese Recenti</h3>
+                        <div class="expenses-table-wrapper desktop-only">
+                            <table class="expenses-table">
+                                <thead>
+                                    <tr>
+                                        <th>Spesa</th>
+                                        <th>Gruppo</th>
+                                        <th>Importo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-expenses-list">
+                                    <!-- Popolato dinamicamente via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Lista Edge-to-Edge per Mobile -->
+                        <div class="mobile-only" id="mobile-recent-expenses-list" style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem;">
+                            <!-- Popolato dinamicamente via JS -->
+                        </div>
                     </div>
+
+                    <!-- Portafoglio Rapido / Dettaglio Gruppi ridotto -->
+                    <div class="card" id="balances-widget">
+                        <h3>Dettagli per Gruppo</h3>
+                        <p style="margin-bottom: 1.5rem;">Un riepilogo rapido del tuo stato per gruppo.</p>
+                        
+                        <div id="balances-loading" style="text-align: center; padding: 2rem; color: var(--primary-color);">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></path></svg>
+                        </div>
+                        
+                        <div id="balances-content" style="display: none;">
+                            <div id="balances-details" style="max-height: 350px; overflow-y: auto;" class="desktop-only">
+                                <!-- Inserito dinamicamente via JS -->
+                            </div>
+                            <div id="mobile-balances-details" class="mobile-only edge-to-edge-list">
+                                <!-- Inserito dinamicamente via JS -->
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
 
         <!-- ============================================== -->
-        <!-- TAB 2: AGGIUNGI (CREA / UNISCITI) -->
-        <!-- ============================================== -->
-        <section id="tab-add" class="tab-content">
-            <div style="text-align: center; margin-bottom: 2rem; position: relative;">
-                <h2 style="font-size: 2rem; color: var(--text-main);">Gestione Gruppi</h2>
-                <p style="color: var(--text-muted);">Crea un nuovo gruppo o unisciti a uno esistente</p>
-                <button id="close-add-sheet" class="mobile-only" style="position: absolute; top: 0; right: 0; background: transparent; box-shadow: none; color: var(--text-muted); font-size: 2rem; padding: 0; line-height: 1;">&times;</button>
-            </div>
-            <div class="dashboard-grid">
-                <!-- Crea Gruppo -->
-                <div class="card" style="display: flex; flex-direction: column; align-items: center; text-align: center; border-top: 4px solid var(--primary-color);">
-                    <div style="width: 60px; height: 60px; background: rgba(99, 102, 241, 0.1); color: var(--primary-color); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; margin-bottom: 1rem;">
-                        ✨
-                    </div>
-                    <h2 style="font-size: 1.4rem;">Crea Nuovo Gruppo</h2>
-                    <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Genera automaticamente un codice alfanumerico da condividere.</p>
-                    <form id="create-group-form" style="width: 100%;">
-                        <input type="text" id="group-name" required placeholder="Es. Viaggio a Parigi" style="text-align: center;">
-                        <button type="submit" style="margin-top: 1rem; width: 100%;">Crea Gruppo</button>
-                    </form>
-                </div>
-
-                <!-- Unisciti -->
-                <div class="card" style="display: flex; flex-direction: column; align-items: center; text-align: center; border-top: 4px solid var(--secondary-color);">
-                    <div style="width: 60px; height: 60px; background: rgba(236, 72, 153, 0.1); color: var(--secondary-color); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; margin-bottom: 1rem;">
-                        🤝
-                    </div>
-                    <h2 style="font-size: 1.4rem;">Unisciti a un Gruppo</h2>
-                    <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Hai ricevuto un codice di invito? Inseriscilo qui sotto.</p>
-                    <form id="join-group-form" style="width: 100%;">
-                        <input type="text" id="invite-code" required placeholder="Es. ABC123" maxlength="6" style="text-transform: uppercase; letter-spacing: 5px; font-weight: 800; text-align: center; font-size: 1.5rem; background: rgba(255,255,255,0.8); border: 2px dashed var(--secondary-color);">
-                        <button type="submit" style="margin-top: 1rem; width: 100%; background: linear-gradient(135deg, var(--secondary-color), #db2777);">Entra nel Gruppo</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================== -->
-        <!-- TAB 3: I MIEI GRUPPI -->
+        <!-- TAB 2: I MIEI GRUPPI -->
         <!-- ============================================== -->
         <section id="tab-groups" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 2rem; margin: 0;">I Miei Gruppi</h2>
+                <button id="alt-nuovo-gruppo-btn" class="btn btn-primary" style="font-size: 0.9rem;">+ Nuovo</button>
+            </div>
+            
             <!-- Desktop Layout -->
-            <div class="card desktop-only" style="background: transparent; border: none; box-shadow: none; padding: 0;">
-                <h2 style="font-size: 2rem; margin-bottom: 1.5rem; padding-left: 0.5rem;">I Miei Gruppi</h2>
-                <div id="groups-list" class="dashboard-grid">
+            <div class="desktop-only" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                <div id="groups-list" class="groups-grid">
                     <!-- Le card verranno inserite dinamicamente qui dal JS -->
                 </div>
             </div>
             
             <!-- Mobile Layout Edge-to-Edge -->
-            <div class="mobile-only app-list-container" style="margin-top: 1rem;">
-                <h4 class="section-title">I Miei Gruppi</h4>
+            <div class="mobile-only app-list-container">
                 <div id="mobile-groups-list" class="edge-to-edge-list">
                     <!-- Le righe verranno inserite dinamicamente qui dal JS -->
                 </div>
@@ -130,12 +160,12 @@
         </section>
 
         <!-- ============================================== -->
-        <!-- TAB 4: PROFILO -->
+        <!-- TAB 3: PROFILO -->
         <!-- ============================================== -->
         <section id="tab-profile" class="tab-content">
             <div class="card" style="max-width: 500px; margin: 0 auto;">
                 <div style="text-align: center; margin-bottom: 2rem;">
-                    <div style="width: 80px; height: 80px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem;">
+                    <div style="width: 80px; height: 80px; background: var(--accent-gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);">
                         <span id="profile-avatar-letter">U</span>
                     </div>
                     <h2>Il Tuo Profilo</h2>
@@ -156,41 +186,68 @@
                     
                     <button type="submit" style="margin-top: 1rem; margin-bottom: 1rem;">Salva Modifiche</button>
                 </form>
-                
-                <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.1); margin: 1.5rem 0;">
-                
-                <button id="logout-btn" class="btn btn-secondary" style="width: 100%; color: var(--error-color);">Esci dall'Account</button>
             </div>
         </section>
 
     </main>
 
-    <!-- FLOATING BOTTOM NAVIGATION BAR -->
-    <nav class="bottom-nav" id="bottom-nav">
-        <!-- Dashboard (Home) -->
-        <div class="nav-item active" data-target="tab-home">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            <span>Home</span>
-        </div>
-        
-        <!-- I Miei Gruppi -->
-        <div class="nav-item" data-target="tab-groups">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            <span>Gruppi</span>
-        </div>
+    <!-- ============================================== -->
+    <!-- MODALI -->
+    <!-- ============================================== -->
 
-        <!-- Aggiungi (Crea/Unisciti) -->
-        <div class="nav-item" data-target="tab-add">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-            <span>Nuovo</span>
-        </div>
+    <!-- Modal: NUOVO GRUPPO (Crea o Unisciti) -->
+    <div id="new-group-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-family: var(--font-heading);">Gestione Gruppi</h2>
+                <button id="close-new-group-modal" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="dashboard-layout" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <!-- Crea Gruppo -->
+                <div class="card" style="padding: 1.5rem; text-align: center; background: rgba(255,255,255,0.01);">
+                    <div style="width: 50px; height: 50px; background: rgba(59, 130, 246, 0.08); color: var(--primary-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 1rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    </div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Crea Nuovo Gruppo</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Genera un codice da condividere.</p>
+                    <form id="create-group-form" style="width: 100%;">
+                        <input type="text" id="group-name" required placeholder="Es. Viaggio a Parigi" style="text-align: center;">
+                        <button type="submit" style="margin-top: 0.5rem; width: 100%;">Crea Gruppo</button>
+                    </form>
+                </div>
 
-        <!-- Profilo -->
-        <div class="nav-item" data-target="tab-profile">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span>Profilo</span>
+                <!-- Unisciti -->
+                <div class="card" style="padding: 1.5rem; text-align: center; background: rgba(255,255,255,0.01);">
+                    <div style="width: 50px; height: 50px; background: rgba(59, 130, 246, 0.08); color: var(--primary-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 1rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Unisciti a un Gruppo</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Hai un codice di invito?</p>
+                    <form id="join-group-form" style="width: 100%;">
+                        <input type="text" id="invite-code" required placeholder="Es. ABC123" maxlength="6" style="text-transform: uppercase; letter-spacing: 5px; font-weight: 800; text-align: center; font-size: 1.2rem; background: rgba(255, 255, 255, 0.03); border: 2px dashed var(--primary-color); color: var(--text-main);">
+                        <button type="submit" style="margin-top: 0.5rem; width: 100%; background: var(--accent-gradient); color: white;">Entra nel Gruppo</button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </nav>
+    </div>
+
+    <!-- QUICK ACTION SETTLE UP MODAL -->
+    <div id="settle-up-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-family: var(--font-heading);">Settle Up</h2>
+                <button id="close-settle-modal" class="close-btn">&times;</button>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                Seleziona un gruppo per visualizzare i rimborsi suggeriti ed estinguere il debito.
+            </p>
+            <div id="settle-up-groups-list" style="display: flex; flex-direction: column; gap: 0.8rem; max-height: 300px; overflow-y: auto; padding-right: 0.3rem;">
+                <!-- Popolato dinamicamente via JS -->
+            </div>
+        </div>
+    </div>
 
     <script src="../js/utils.js"></script>
     <script src="../js/dashboard.js"></script>

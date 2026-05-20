@@ -1,6 +1,6 @@
 /**
  * utils.js
- * Funzioni di utilità globale per il frontend, incluse le notifiche Toast.
+ * Funzioni di utilità globale per il frontend, inclusa la gestione del logout globale e notifiche Toast.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,23 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(toastContainer);
     }
 
-    // Inizializza Dark Mode
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-        const btn = document.getElementById('theme-toggle-btn');
-        if (btn) btn.textContent = '☀️';
-    }
+    // Gestione Logout Globale
+    // Seleziona qualsiasi bottone di logout (id o classe) presente nel DOM
+    const logoutButtons = document.querySelectorAll('#logout-btn, #top-logout-btn, .logout-action');
+    logoutButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Rimuove i dati dell'utente dalla sessione locale e reindirizza al login
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        });
+    });
 });
-
-/**
- * Attiva o disattiva la Dark Mode e salva la preferenza.
- */
-window.toggleTheme = function() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    const btn = document.getElementById('theme-toggle-btn');
-    if (btn) btn.textContent = isDark ? '☀️' : '🌙';
-};
 
 /**
  * Mostra un banner di notifica Toast in basso a destra.

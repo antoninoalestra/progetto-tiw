@@ -3,28 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registrazione - Gestione Spese di Gruppo</title>
+  <title>Registrati a Qotly - Gestione Spese di Gruppo</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
+<body style="padding-top: 0;">
   <div class="auth-wrapper">
     <div class="form-container">
-      <h2>Registrazione</h2>
-    <form id="registerForm">
-      <label for="nome">Nome:</label>
-      <input type="text" id="nome" name="nome" required>
+      <div class="auth-brand">
+        <div class="logo">Qotly</div>
+        <p>Crea un account gratuito in pochi secondi.</p>
+      </div>
+      
+      <form id="registerForm">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" required placeholder="Es. Mario">
 
-      <label for="cognome">Cognome:</label>
-      <input type="text" id="cognome" name="cognome" required>
+        <label for="cognome">Cognome</label>
+        <input type="text" id="cognome" name="cognome" required placeholder="Es. Rossi">
 
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required>
+        <label for="email">Indirizzo Email</label>
+        <input type="email" id="email" name="email" required placeholder="mario.rossi@email.com">
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required placeholder="Scegli una password sicura">
 
-      <button type="submit">Registrati</button>
-    </form>
+        <button type="submit" style="margin-top: 0.5rem; width: 100%;">Registrati</button>
+      </form>
+      
       <div class="links">
         Hai già un account? <a href="login.html">Accedi qui</a>
       </div>

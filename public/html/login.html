@@ -3,24 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Gestione Spese di Gruppo</title>
+  <title>Accedi a Qotly - Gestione Spese di Gruppo</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
+<body style="padding-top: 0;">
   <div class="auth-wrapper">
     <div class="form-container">
-      <h2>Login</h2>
-    <form id="loginForm">
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required>
+      <div class="auth-brand">
+        <div class="logo">Qotly</div>
+        <p>Condividi le spese, non le preoccupazioni.</p>
+      </div>
+      
+      <form id="loginForm">
+        <label for="email">Indirizzo Email</label>
+        <input type="email" id="email" name="email" required placeholder="Inserisci la tua email">
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required placeholder="Inserisci la tua password">
 
-      <button type="submit">Accedi</button>
-    </form>
+        <button type="submit" style="margin-top: 0.5rem; width: 100%;">Accedi</button>
+      </form>
+      
       <div class="links">
-        Non hai un account? <a href="register.html">Registrati qui</a>
+        Non hai ancora un account? <a href="register.html">Registrati qui</a>
       </div>
     </div>
   </div>

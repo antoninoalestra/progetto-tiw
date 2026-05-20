@@ -99,13 +99,23 @@ export const getUserGroups = async (req, res) => {
       return res.status(400).json({ error: 'L\'ID utente è obbligatorio.' });
     }
 
-    // Recupera tutti i gruppi
+    // Recupera tutti i gruppi e utenti
     const allGroups = await Database.getAll('groups');
+    const allUsers = await Database.getAll('users');
     
     // Filtra i gruppi in cui l'utente è presente nell'array members
     const userGroups = allGroups.filter(group => group.members && group.members.includes(userId));
 
-    res.status(200).json(userGroups);
+    // Popola i membri
+    const populatedUserGroups = userGroups.map(group => {
+      const populatedMembers = group.members.map(memberId => {
+        const user = allUsers.find(u => u.id === memberId);
+        return user ? { id: user.id, nome: user.nome, cognome: user.cognome } : { id: memberId, nome: 'Utente', cognome: 'Sconosciuto' };
+      });
+      return { ...group, members: populatedMembers };
+    });
+
+    res.status(200).json(populatedUserGroups);
   } catch (error) {
     console.error('Errore durante il recupero dei gruppi dell\'utente:', error);
     res.status(500).json({ error: 'Errore interno del server.' });
@@ -236,63 +246,165 @@ export const exportGroupPdf = async (req, res) => {
     const group = await Database.getById('groups', groupId);
     if (!group) return res.status(404).json({ error: 'Gruppo non trovato.' });
 
-    // Fetch members info
+    // Fetch data
     const users = await Database.getAll('users');
     const membersData = users.filter(u => group.members.includes(u.id));
 
-    // Fetch expenses
     const expenses = await Database.getAll('expenses');
     const groupExpenses = expenses.filter(e => e.groupId === groupId);
 
-    // Fetch settlements
     const settlements = await Database.getAll('settlements');
     const groupSettlements = settlements.filter(s => s.groupId === groupId);
 
-    // Create PDF
-    const doc = new PDFDocument({ margin: 50 });
+    // Create PDF with buffering for pagination
+    const doc = new PDFDocument({ margin: 0, size: 'A4', bufferPages: true });
     
-    // Set response headers
-    res.setHeader('Content-disposition', `attachment; filename=report_${group.name.replace(/\s+/g, '_')}.pdf`);
+    res.setHeader('Content-disposition', `attachment; filename=Qotly_Report_${group.name.replace(/\s+/g, '_')}.pdf`);
     res.setHeader('Content-type', 'application/pdf');
 
     doc.pipe(res);
 
-    // PDF Content
-    doc.fontSize(24).fillColor('#6366f1').text(`Report Gruppo: ${group.name}`, { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).fillColor('#64748b').text(`Generato il: ${new Date().toLocaleDateString('it-IT')} alle ${new Date().toLocaleTimeString('it-IT')}`, { align: 'center' });
-    doc.moveDown(2);
+    // Coordinate e Misure
+    const marginX = 50;
+    const usableWidth = doc.page.width - marginX * 2;
 
-    doc.fontSize(16).fillColor('#1e293b').text('Spese Effettuate', { underline: true });
-    doc.moveDown();
+    // Helper per controllare la fine della pagina
+    function checkPage(heightNeeded = 40) {
+      if (doc.y + heightNeeded > doc.page.height - 50) {
+        doc.addPage();
+        doc.y = 50;
+      }
+    }
+
+    // --- HEADER ---
+    doc.rect(0, 0, doc.page.width, 110).fill('#0f172a');
+    doc.fontSize(32).fillColor('#ffffff').font('Helvetica-Bold').text('Qotly', marginX, 35);
+    doc.fontSize(12).fillColor('#94a3b8').font('Helvetica').text('Report Finanziario di Gruppo', marginX, 75);
     
+    doc.fontSize(20).fillColor('#3b82f6').font('Helvetica-Bold').text(group.name, 0, 45, { align: 'right', width: doc.page.width - marginX });
+    
+    doc.y = 140;
+
+    // --- RIASSUNTO METRICHE ---
+    const totalExpenses = groupExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    
+    doc.rect(marginX, doc.y, usableWidth, 80).fill('#f8fafc').stroke('#e2e8f0');
+    doc.lineWidth(1).rect(marginX, doc.y, usableWidth, 80).stroke();
+    
+    let summaryY = doc.y + 15;
+    doc.fillColor('#64748b').fontSize(11).font('Helvetica-Bold').text('TOTALE SPESE', marginX + 20, summaryY);
+    doc.fillColor('#0f172a').fontSize(24).font('Helvetica-Bold').text(`€ ${totalExpenses.toFixed(2)}`, marginX + 20, summaryY + 20);
+
+    doc.fillColor('#64748b').fontSize(11).text('MEMBRI', marginX + 220, summaryY);
+    doc.fillColor('#0f172a').fontSize(24).text(`${membersData.length}`, marginX + 220, summaryY + 20);
+
+    doc.fillColor('#64748b').fontSize(11).text('DATA EMISSIONE', marginX + 370, summaryY);
+    doc.fillColor('#0f172a').fontSize(16).text(`${new Date().toLocaleDateString('it-IT')}`, marginX + 370, summaryY + 25);
+
+    doc.y += 110;
+
+    // --- SPESE TABLE ---
+    doc.fontSize(16).fillColor('#0f172a').font('Helvetica-Bold').text('Dettaglio Spese', marginX, doc.y);
+    doc.y += 15;
+
+    // Table Header
+    doc.rect(marginX, doc.y, usableWidth, 25).fill('#e2e8f0');
+    let headerY = doc.y + 7;
+    doc.fillColor('#475569').fontSize(10).font('Helvetica-Bold');
+    doc.text('DATA', marginX + 10, headerY);
+    doc.text('DESCRIZIONE', marginX + 100, headerY);
+    doc.text('PAGATO DA', marginX + 320, headerY);
+    doc.text('IMPORTO', doc.page.width - marginX - 70, headerY, { width: 60, align: 'right' });
+    
+    doc.y += 25;
+
     if (groupExpenses.length === 0) {
-       doc.fontSize(12).fillColor('#64748b').text('Nessuna spesa registrata.');
+       doc.y += 10;
+       doc.fillColor('#64748b').font('Helvetica').fontSize(11).text('Nessuna spesa registrata per questo gruppo.', marginX, doc.y);
+       doc.y += 20;
     } else {
-       groupExpenses.forEach(exp => {
+       doc.font('Helvetica').fontSize(10);
+       groupExpenses.forEach((exp, index) => {
+         checkPage(30);
+         
+         // Alternating row background
+         if (index % 2 === 0) {
+            doc.rect(marginX, doc.y, usableWidth, 25).fill('#f8fafc');
+         }
+         
+         const rowY = doc.y + 7;
          const payer = membersData.find(u => u.id === exp.payerId)?.nome || 'Sconosciuto';
          const date = new Date(exp.date).toLocaleDateString('it-IT');
-         doc.fontSize(12).fillColor('#1e293b').text(`• [${date}] ${exp.description} : `).continued().fillColor('#ef4444').text(`€${exp.amount.toFixed(2)}`, { continued: true }).fillColor('#1e293b').text(` (Pagato da: ${payer})`);
+         
+         doc.fillColor('#334155');
+         doc.text(date, marginX + 10, rowY);
+         doc.text(exp.description, marginX + 100, rowY, { width: 200, lineBreak: false });
+         doc.text(payer, marginX + 320, rowY);
+         doc.fillColor('#ef4444').font('Helvetica-Bold').text(`€ ${exp.amount.toFixed(2)}`, doc.page.width - marginX - 70, rowY, { width: 60, align: 'right' });
+         
+         doc.font('Helvetica');
+         doc.y += 25;
        });
     }
 
-    doc.moveDown(2);
-    doc.fontSize(16).fillColor('#1e293b').text('Rimborsi Effettuati', { underline: true });
-    doc.moveDown();
+    doc.y += 30;
+    checkPage(100);
+
+    // --- RIMBORSI TABLE ---
+    doc.fontSize(16).fillColor('#0f172a').font('Helvetica-Bold').text('Storico Rimborsi', marginX, doc.y);
+    doc.y += 15;
+
+    doc.rect(marginX, doc.y, usableWidth, 25).fill('#e2e8f0');
+    headerY = doc.y + 7;
+    doc.fillColor('#475569').fontSize(10).font('Helvetica-Bold');
+    doc.text('DATA', marginX + 10, headerY);
+    doc.text('PAGATORE', marginX + 100, headerY);
+    doc.text('BENEFICIARIO', marginX + 250, headerY);
+    doc.text('IMPORTO', doc.page.width - marginX - 70, headerY, { width: 60, align: 'right' });
+    
+    doc.y += 25;
 
     if (groupSettlements.length === 0) {
-       doc.fontSize(12).fillColor('#64748b').text('Nessun rimborso registrato.');
+       doc.y += 10;
+       doc.fillColor('#64748b').font('Helvetica').fontSize(11).text('Nessun rimborso registrato per questo gruppo.', marginX, doc.y);
     } else {
-       groupSettlements.forEach(s => {
+       doc.font('Helvetica').fontSize(10);
+       groupSettlements.forEach((s, index) => {
+         checkPage(30);
+         
+         if (index % 2 === 0) {
+            doc.rect(marginX, doc.y, usableWidth, 25).fill('#f8fafc');
+         }
+         
+         const rowY = doc.y + 7;
          const payer = membersData.find(u => u.id === s.payerId)?.nome || 'Sconosciuto';
          const payee = membersData.find(u => u.id === s.payeeId)?.nome || 'Sconosciuto';
          const date = new Date(s.date).toLocaleDateString('it-IT');
-         doc.fontSize(12).fillColor('#1e293b').text(`• [${date}] ${payer} ha rimborsato ${payee} di `).continued().fillColor('#10b981').text(`€${s.amount.toFixed(2)}`);
+         
+         doc.fillColor('#334155');
+         doc.text(date, marginX + 10, rowY);
+         doc.text(payer, marginX + 100, rowY);
+         doc.text(payee, marginX + 250, rowY);
+         doc.fillColor('#10b981').font('Helvetica-Bold').text(`€ ${s.amount.toFixed(2)}`, doc.page.width - marginX - 70, rowY, { width: 60, align: 'right' });
+         
+         doc.font('Helvetica');
+         doc.y += 25;
        });
     }
 
-    doc.end();
+    // --- FOOTER Paginazione ---
+    const range = doc.bufferedPageRange();
+    for (let i = range.start; i < range.start + range.count; i++) {
+      doc.switchToPage(i);
+      doc.fontSize(9).fillColor('#94a3b8').text(
+        `Pagina ${i + 1} di ${range.count}  •  Generato con Qotly`,
+        0,
+        doc.page.height - 30,
+        { align: 'center', width: doc.page.width }
+      );
+    }
 
+    doc.end();
   } catch (error) {
     console.error('Errore export PDF:', error);
     if (!res.headersSent) {

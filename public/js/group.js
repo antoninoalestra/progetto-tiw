@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper per l'Avatar
     function getAvatarHtml(nome, cognome) {
         const init = (nome.charAt(0) + (cognome ? cognome.charAt(0) : '')).toUpperCase();
-        const colors = ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#14b8a6', '#10b981', '#f59e0b', '#f97316'];
+        const colors = ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#475569', '#64748b', '#4f46e5', '#4338ca', '#0284c7', '#0369a1', '#0f172a'];
         const num = Array.from(nome + cognome).reduce((a, b) => a + b.charCodeAt(0), 0);
         const bg = colors[num % colors.length];
         return `<span class="avatar" style="background:${bg};">${init}</span>`;
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // RIMBORSI SUGGERITI
             suggestedSettlementsList.innerHTML = '';
             if (data.suggestedSettlements.length === 0) {
-                suggestedSettlementsList.innerHTML = `<p style="text-align: center; color: var(--success-color); padding: 1rem 0; font-weight: 500;">Tutti i conti sono in pari! 🎉</p>`;
+                suggestedSettlementsList.innerHTML = `<p style="text-align: center; color: var(--success-color); padding: 1rem 0; font-weight: 500;">Tutti i conti sono in pari!</p>`;
             } else {
                 data.suggestedSettlements.forEach(s => {
                     const debtorObj = usersMap[s.debtorId] || { nome: 'Utente', cognome: 'Uscito' };

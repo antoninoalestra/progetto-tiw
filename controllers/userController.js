@@ -200,3 +200,61 @@ export const getUserBalances = async (req, res) => {
   }
 };
 
+/**
+ * Recupera le spese recenti dell'utente su tutti i gruppi di cui fa parte.
+ * @param {Object} req - L'oggetto richiesta di Express
+ * @param {Object} res - L'oggetto risposta di Express
+ */
+export const getUserExpenses = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Recupera tutti i gruppi
+    const allGroups = await Database.getAll('groups');
+    // Filtra i gruppi in cui l'utente è presente come membro
+    const userGroups = allGroups.filter(g => g.members && g.members.includes(userId));
+    const userGroupIds = userGroups.map(g => g.id);
+
+    // Recupera tutte le spese registrate nel sistema
+    const allExpenses = await Database.getAll('expenses');
+    // Filtra le spese appartenenti ai gruppi dell'utente
+    const userExpenses = allExpenses.filter(e => userGroupIds.includes(e.groupId));
+
+    // Recupera tutti gli utenti per poter mappare i nomi degli acquirenti
+    const allUsers = await Database.getAll('users');
+    const userMap = {};
+    allUsers.forEach(u => {
+      userMap[u.id] = `${u.nome} ${u.cognome}`;
+    });
+
+    // Mappa per associazione rapida ID Gruppo -> Nome Gruppo
+    const groupMap = {};
+    userGroups.forEach(g => {
+      groupMap[g.id] = g.name;
+    });
+
+    // Arricchisce i dati della spesa con le informazioni di gruppo e pagatore, poi ordina decrescente per data
+    const enrichedExpenses = userExpenses.map(e => {
+      return {
+        id: e.id,
+        groupId: e.groupId,
+        groupName: groupMap[e.groupId] || 'Gruppo sconosciuto',
+        description: e.description,
+        amount: e.amount,
+        payerId: e.payerId,
+        payerName: userMap[e.payerId] || 'Utente sconosciuto',
+        date: e.date
+      };
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Restituisce solo le ultime 5 spese registrate nei suoi gruppi
+    const recentExpenses = enrichedExpenses.slice(0, 5);
+
+    res.status(200).json(recentExpenses);
+  } catch (error) {
+    console.error('Errore durante il recupero delle spese recenti:', error);
+    res.status(500).json({ error: 'Errore interno del server.' });
+  }
+};
+
+

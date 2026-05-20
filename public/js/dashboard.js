@@ -20,7 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.mobile-welcome-name').forEach(e => e.textContent = user.nome);
 
     const profileAvatarLetter = document.getElementById('profile-avatar-letter');
-    profileAvatarLetter.textContent = user.nome.charAt(0).toUpperCase();
+    if (profileAvatarLetter) profileAvatarLetter.textContent = user.nome.charAt(0).toUpperCase();
+    const topProfileAvatar = document.getElementById('top-profile-avatar-letter');
+    if (topProfileAvatar) topProfileAvatar.textContent = user.nome.charAt(0).toUpperCase();
+    
+    let lastBalancesData = { totalOwed: 0, totalCredit: 0, details: [] };
     
     const logoutBtn = document.getElementById('logout-btn');
     const groupsListContainer = document.getElementById('groups-list');
@@ -47,10 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initData() {
         await fetchUserGroups(user.id);
         await fetchUserBalances(user.id);
+        await fetchRecentExpenses(user.id);
     }
 
     // ==========================================
-    // GESTIONE NAVIGAZIONE (BOTTOM NAV)
+    // GESTIONE NAVIGAZIONE E MODALI (TOP NAV)
     // ==========================================
     const navItems = document.querySelectorAll('.nav-item');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -58,34 +63,43 @@ document.addEventListener('DOMContentLoaded', () => {
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const targetId = item.getAttribute('data-target');
+            if (!targetId) return;
 
-            // Phase 3: "Nuovo" diventa Bottom Sheet overlay su Mobile
-            if (targetId === 'tab-add' && window.innerWidth <= 640) {
-                const addSheet = document.getElementById('tab-add');
-                addSheet.classList.add('mobile-bottom-sheet-active');
-                return; // Non cambiare i tab attivi sottostanti
-            }
-
-            // Rimuovi active da tutti i tab
-            navItems.forEach(nav => nav.classList.remove('active'));
+            // Rimuovi active da tutti i tab di navigazione
+            document.querySelectorAll('#main-nav .nav-item').forEach(nav => nav.classList.remove('active'));
             tabContents.forEach(tab => tab.classList.remove('active'));
 
-            // Aggiungi active al target
-            item.classList.add('active');
-            document.getElementById(targetId).classList.add('active');
+            // Aggiungi active al link cliccato
+            if (item.closest('#main-nav')) {
+                item.classList.add('active');
+            } else {
+                const navLink = document.querySelector(`#main-nav .nav-item[data-target="${targetId}"]`);
+                if (navLink) navLink.classList.add('active');
+            }
             
-            // Seleziona aggiornamento dati dinamico
+            const targetTab = document.getElementById(targetId);
+            if (targetTab) targetTab.classList.add('active');
+            
             if (targetId === 'tab-home' || targetId === 'tab-groups') {
-                initData(); // Refresh rapido in background per avere dati sempre aggiornati
+                initData(); 
             }
         });
     });
 
-    // Chiusura Bottom Sheet Mobile
-    const closeAddSheetBtn = document.getElementById('close-add-sheet');
-    if (closeAddSheetBtn) {
-        closeAddSheetBtn.addEventListener('click', () => {
-            document.getElementById('tab-add').classList.remove('mobile-bottom-sheet-active');
+    const newGroupModal = document.getElementById('new-group-modal');
+    const btnNuovoNav = document.getElementById('nav-btn-nuovo');
+    const btnNuovoAlt = document.getElementById('alt-nuovo-gruppo-btn');
+    const closeNewGroupModal = document.getElementById('close-new-group-modal');
+
+    function openNewGroupModal() {
+        if (newGroupModal) newGroupModal.classList.add('active');
+    }
+
+    if (btnNuovoNav) btnNuovoNav.addEventListener('click', openNewGroupModal);
+    if (btnNuovoAlt) btnNuovoAlt.addEventListener('click', openNewGroupModal);
+    if (closeNewGroupModal) {
+        closeNewGroupModal.addEventListener('click', () => {
+            newGroupModal.classList.remove('active');
         });
     }
 
@@ -119,7 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 user = updatedUser; 
                 if (welcomeText) welcomeText.textContent = user.nome;
                 document.querySelectorAll('.mobile-welcome-name').forEach(e => e.textContent = user.nome);
-                profileAvatarLetter.textContent = user.nome.charAt(0).toUpperCase();
+                if (profileAvatarLetter) profileAvatarLetter.textContent = user.nome.charAt(0).toUpperCase();
+                const topProfileAvatarUpdate = document.getElementById('top-profile-avatar-letter');
+                if (topProfileAvatarUpdate) topProfileAvatarUpdate.textContent = user.nome.charAt(0).toUpperCase();
                 profilePassword.value = ''; 
                 window.showNotification('Profilo aggiornato con successo!');
             } else {
@@ -156,8 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.showNotification(`Creato! Codice invito: ${newGroup.inviteCode}`);
                 groupNameInput.value = '';
                 
-                // Torna al tab gruppi per vederlo
-                document.querySelector('.nav-item[data-target="tab-groups"]').click();
+                // Torna al tab gruppi per vederlo e chiudi modale
+                if (newGroupModal) newGroupModal.classList.remove('active');
+                const targetLink = document.querySelector('.nav-item[data-target="tab-groups"]');
+                if (targetLink) targetLink.click();
             } else {
                 const errorData = await response.json();
                 window.showNotification(errorData.error, true);
@@ -189,8 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 window.showNotification('Aggiunto al gruppo!');
                 codeInput.value = '';
-                // Torna al tab gruppi
-                document.querySelector('.nav-item[data-target="tab-groups"]').click();
+                // Torna al tab gruppi e chiudi modale
+                if (newGroupModal) newGroupModal.classList.remove('active');
+                const targetLink = document.querySelector('.nav-item[data-target="tab-groups"]');
+                if (targetLink) targetLink.click();
             } else {
                 const errorData = await response.json();
                 window.showNotification(errorData.error, true);
@@ -223,9 +243,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`/api/users/${userId}/balances`);
             if (!response.ok) throw new Error('Errore saldi');
             const data = await response.json();
+            
+            // Salva i dati dei saldi per la modale Settle Up
+            lastBalancesData = data;
 
-            document.getElementById('total-owed').innerHTML = `&euro;${data.totalOwed.toFixed(2)}`;
-            document.getElementById('total-credit').innerHTML = `&euro;${data.totalCredit.toFixed(2)}`;
+            // Calcola il bilancio netto
+            const netBalance = data.totalCredit - data.totalOwed;
+            const formattedNetBalance = `${netBalance >= 0 ? '+' : ''}€${netBalance.toFixed(2)}`;
+
+            const netBalanceEl = document.getElementById('net-balance-value');
+            if (netBalanceEl) {
+                netBalanceEl.textContent = formattedNetBalance;
+                netBalanceEl.className = `net-balance-amount ${netBalance >= 0 ? 'amount-positive' : 'amount-negative'}`;
+            }
+
+            const mobileNetBalanceEl = document.getElementById('mobile-net-balance-value');
+            if (mobileNetBalanceEl) {
+                mobileNetBalanceEl.textContent = formattedNetBalance;
+                mobileNetBalanceEl.className = `net-balance-amount ${netBalance >= 0 ? 'amount-positive' : 'amount-negative'}`;
+            }
+
+            const totalOwedEl = document.getElementById('total-owed');
+            if (totalOwedEl) totalOwedEl.innerHTML = `&euro;${data.totalOwed.toFixed(2)}`;
+            
+            const totalCreditEl = document.getElementById('total-credit');
+            if (totalCreditEl) totalCreditEl.innerHTML = `&euro;${data.totalCredit.toFixed(2)}`;
             
             const mobileTotalOwed = document.getElementById('mobile-total-owed');
             if (mobileTotalOwed) mobileTotalOwed.innerHTML = `&euro;${data.totalOwed.toFixed(2)}`;
@@ -291,6 +333,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function getAvatarHtml(nome, cognome) {
+        const init = (nome.charAt(0) + (cognome ? cognome.charAt(0) : '')).toUpperCase();
+        const colors = ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#475569', '#64748b', '#4f46e5', '#4338ca', '#0284c7', '#0369a1', '#0f172a'];
+        const num = Array.from(nome + cognome).reduce((a, b) => a + b.charCodeAt(0), 0);
+        const bg = colors[num % colors.length];
+        return `<span class="avatar" style="background:${bg}; margin-right: 0;">${init}</span>`;
+    }
+
+    function getGroupGradient(name) {
+        const gradients = [
+            'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+            'linear-gradient(135deg, #10b981 0%, #047857 100%)',
+            'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
+            'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+            'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)'
+        ];
+        const num = Array.from(name).reduce((a, b) => a + b.charCodeAt(0), 0);
+        return gradients[num % gradients.length];
+    }
+
     function renderGroups(groups) {
         if (groupsListContainer) groupsListContainer.innerHTML = '';
         const mobileGroupsList = document.getElementById('mobile-groups-list');
@@ -303,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
             emptyState.innerHTML = `<p>Nessun gruppo trovato.</p>`;
             
             if (groupsListContainer) {
-                groupsListContainer.classList.remove('dashboard-grid');
                 groupsListContainer.appendChild(emptyState.cloneNode(true));
             }
             if (mobileGroupsList) {
@@ -312,21 +374,45 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (groupsListContainer) groupsListContainer.classList.add('dashboard-grid');
-
         groups.forEach(group => {
             const isAdmin = group.adminId === user.id;
-            const badgeHTML = isAdmin ? `<span style="background: var(--warning-color); color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 0.5rem; vertical-align: top;">Admin</span>` : '';
+            const badgeHTML = isAdmin ? `<span style="background: rgba(0,0,0,0.4); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(4px); height: fit-content;">Admin</span>` : '<div></div>';
 
-            // DESKTOP CARD
+            const membersCount = group.members ? group.members.length : 0;
+            let avatarsHTML = '';
+            if (group.members) {
+                const displayMembers = group.members.slice(0, 4);
+                displayMembers.forEach(m => {
+                    avatarsHTML += getAvatarHtml(m.nome, m.cognome);
+                });
+                if (membersCount > 4) {
+                    avatarsHTML += `<span class="avatar" style="background: var(--secondary-color); font-size: 0.65rem; margin-right: 0;">+${membersCount - 4}</span>`;
+                }
+            }
+
+            // DESKTOP CARD GLASSMORPHIC
             const card = document.createElement('div');
-            card.className = 'card';
+            card.className = 'group-card';
             card.innerHTML = `
-                <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-main);">${group.name} ${badgeHTML}</h3>
-                <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
-                    Membri: <strong style="color: var(--primary-color);">${group.members ? group.members.length : 0}</strong>
-                </p>
-                <a href="group.html?id=${group.id}" class="btn" style="width: 100%;">Entra nel Gruppo</a>
+                <div class="group-card-cover" style="background: ${getGroupGradient(group.name)};">
+                    <div class="group-card-icon">${group.name.charAt(0).toUpperCase()}</div>
+                    ${badgeHTML}
+                </div>
+                <div class="group-card-content">
+                    <h3 class="group-card-title">${group.name}</h3>
+                    <div class="group-card-meta">
+                        <div class="avatar-stack">
+                            ${avatarsHTML}
+                        </div>
+                        <span class="members-count">${membersCount} ${membersCount === 1 ? 'Membro' : 'Membri'}</span>
+                    </div>
+                    <div class="group-card-actions">
+                        <a href="group.html?id=${group.id}" class="btn btn-soft" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                            Apri Gruppo
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
+                    </div>
+                </div>
             `;
             if (groupsListContainer) groupsListContainer.appendChild(card);
 
@@ -349,6 +435,137 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             if (mobileGroupsList) mobileGroupsList.appendChild(mRow);
+        });
+    }
+
+    // ==========================================
+    // RECUPERO E RENDER SPESE RECENTI (GLOBAL)
+    // ==========================================
+    async function fetchRecentExpenses(userId) {
+        try {
+            const response = await fetch(`/api/users/${userId}/expenses`);
+            if (!response.ok) throw new Error('Errore recupero spese recenti');
+            const expenses = await response.json();
+            renderRecentExpenses(expenses);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function renderRecentExpenses(expenses) {
+        const desktopList = document.getElementById('recent-expenses-list');
+        const mobileList = document.getElementById('mobile-recent-expenses-list');
+
+        if (desktopList) desktopList.innerHTML = '';
+        if (mobileList) mobileList.innerHTML = '';
+
+        if (!expenses || expenses.length === 0) {
+            const emptyHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Nessuna spesa recente registrata.</td></tr>`;
+            const emptyMobileHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1rem;">Nessuna spesa recente.</div>`;
+            if (desktopList) desktopList.innerHTML = emptyHTML;
+            if (mobileList) mobileList.innerHTML = emptyMobileHTML;
+            return;
+        }
+
+        expenses.forEach(e => {
+            // Desktop table row
+            if (desktopList) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="expense-row-info">
+                            <div class="expense-row-icon">
+                                <svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                            </div>
+                            <div>
+                                <strong>${e.description}</strong>
+                                <span class="expense-row-payer">Pagata da: ${e.payerName}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge-group">${e.groupName}</span></td>
+                    <td><strong class="amount-negative">€${e.amount.toFixed(2)}</strong></td>
+                `;
+                desktopList.appendChild(tr);
+            }
+
+            // Mobile row
+            if (mobileList) {
+                const div = document.createElement('div');
+                div.className = 'expense-item';
+                div.style.margin = '0';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                            <div class="expense-row-icon" style="width: 28px; height: 28px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">
+                                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                            </div>
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--text-main); display: block;">${e.description}</strong>
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">${e.groupName} • ${e.payerName}</small>
+                            </div>
+                        </div>
+                        <strong class="amount-negative" style="font-size: 0.95rem;">€${e.amount.toFixed(2)}</strong>
+                    </div>
+                `;
+                mobileList.appendChild(div);
+            }
+        });
+    }
+
+    // ==========================================
+    // MODALE SETTLE UP
+    // ==========================================
+    const settleUpModal = document.getElementById('settle-up-modal');
+    const closeSettleModal = document.getElementById('close-settle-modal');
+    const settleUpCta = document.getElementById('settle-up-cta');
+    const mobileSettleUpCta = document.getElementById('mobile-settle-up-cta');
+    const settleUpGroupsList = document.getElementById('settle-up-groups-list');
+
+    function openSettleUpModal(balancesData) {
+        if (!settleUpGroupsList) return;
+        settleUpGroupsList.innerHTML = '';
+
+        // Filtra i gruppi in cui l'utente ha un debito attivo (owed > 0)
+        const debtDetails = balancesData.details.filter(d => d.owed > 0);
+
+        if (debtDetails.length === 0) {
+            settleUpGroupsList.innerHTML = `
+                <div class="empty-state" style="padding: 1.5rem; gap: 0.5rem; border: none;">
+                    <p style="font-size: 0.95rem;">Nessun debito attivo da saldare nei tuoi gruppi! Sei in pari.</p>
+                </div>
+            `;
+        } else {
+            debtDetails.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'settle-group-item';
+                item.innerHTML = `
+                    <div class="group-details">
+                        <span class="group-name">${d.groupName}</span>
+                        <span class="debt-value amount-negative">Debito: €${d.owed.toFixed(2)}</span>
+                    </div>
+                    <a href="group.html?id=${d.groupId}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">Saldare</a>
+                `;
+                settleUpGroupsList.appendChild(item);
+            });
+        }
+
+        if (settleUpModal) settleUpModal.classList.add('active');
+    }
+
+    if (settleUpCta) {
+        settleUpCta.addEventListener('click', () => {
+            openSettleUpModal(lastBalancesData);
+        });
+    }
+    if (mobileSettleUpCta) {
+        mobileSettleUpCta.addEventListener('click', () => {
+            openSettleUpModal(lastBalancesData);
+        });
+    }
+    if (closeSettleModal) {
+        closeSettleModal.addEventListener('click', () => {
+            settleUpModal.classList.remove('active');
         });
     }
 
