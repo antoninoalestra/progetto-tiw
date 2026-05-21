@@ -129,14 +129,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'member-card';
 
                 let badgesHtml = '';
-                if (isMemberAdmin) badgesHtml += `<span class="badge badge-warning" style="margin-left: 8px;">Admin</span>`;
-                if (isMe) badgesHtml += `<span class="badge badge-info" style="margin-left: 8px;">Tu</span>`;
+                if (isMemberAdmin) badgesHtml += `<span class="badge badge-warning" style="font-size: 10px; padding: 2px 6px;">Admin</span>`;
+                if (isMe) badgesHtml += `<span class="badge badge-info" style="font-size: 10px; padding: 2px 6px;">Tu</span>`;
 
                 card.innerHTML = `
-                    ${getAvatarHtml(member.nome, member.cognome)}
-                    <div class="member-info" style="flex-grow: 1;">
-                        <h4>${member.nome} ${member.cognome || ''} ${badgesHtml}</h4>
-                        <p>${member.email}</p>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;">
+                        ${getAvatarHtml(member.nome, member.cognome)}
+                        ${badgesHtml ? `<div style="display: flex; flex-direction: column; gap: 4px;">${badgesHtml}</div>` : ''}
+                    </div>
+                    <div class="member-info" style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--text-primary); word-break: break-word;">${member.nome} ${member.cognome || ''}</h4>
+                        ${member.email ? `<span style="font-size: 13px; color: var(--text-secondary); word-break: break-all;">${member.email}</span>` : ''}
                     </div>
                 `;
 
@@ -317,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="expense-amount-area">
                             <div class="expense-amount amount-negative">${eurFormatter.format(exp.amount)}</div>
-                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${new Date(exp.createdAt).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${new Date(exp.date).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}</div>
                         </div>
                     `;
                     if (expensesList) expensesList.appendChild(div);

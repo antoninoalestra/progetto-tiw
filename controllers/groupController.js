@@ -29,7 +29,7 @@ export const getGroupById = async (req, res) => {
     const populatedMembers = group.members.map(memberId => {
       const user = allUsers.find(u => u.id === memberId);
       // Se l'utente non viene trovato, restituiamo un utente mockato
-      return user ? { id: user.id, nome: user.nome, cognome: user.cognome } : { id: memberId, nome: 'Utente', cognome: 'Sconosciuto' };
+      return user ? { id: user.id, nome: user.nome, cognome: user.cognome, email: user.email } : { id: memberId, nome: 'Utente', cognome: 'Sconosciuto', email: '' };
     });
 
     // Crea un nuovo oggetto gruppo con i membri popolati
@@ -110,7 +110,7 @@ export const getUserGroups = async (req, res) => {
     const populatedUserGroups = userGroups.map(group => {
       const populatedMembers = group.members.map(memberId => {
         const user = allUsers.find(u => u.id === memberId);
-        return user ? { id: user.id, nome: user.nome, cognome: user.cognome } : { id: memberId, nome: 'Utente', cognome: 'Sconosciuto' };
+        return user ? { id: user.id, nome: user.nome, cognome: user.cognome, email: user.email } : { id: memberId, nome: 'Utente', cognome: 'Sconosciuto', email: '' };
       });
       return { ...group, members: populatedMembers };
     });
