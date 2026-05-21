@@ -1,103 +1,104 @@
 <div align="center">
-  <img src="https://img.icons8.com/color/96/000000/wallet--v1.png" alt="Qotly Logo">
-  <h1>Qotly - Gestione Spese di Gruppo</h1>
-  <p><strong>Un'applicazione Web moderna per tracciare le spese condivise e ottimizzare i rimborsi.</strong></p>
+  <img src="https://img.icons8.com/color/96/000000/wallet--v1.png" alt="Qotly Logo" width="80">
+  <h1>Qotly</h1>
+  <p><strong>Sistema Avanzato per la Gestione delle Spese di Gruppo</strong></p>
   
-  [![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
-  [![Express](https://img.shields.io/badge/Express-4.x-lightgrey.svg)](https://expressjs.com/)
-  [![Socket.IO](https://img.shields.io/badge/Socket.IO-RealTime-black.svg)](https://socket.io/)
-  [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  <div>
+    <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
+    <img src="https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white" alt="Express">
+    <img src="https://img.shields.io/badge/Socket.io-010101?style=flat&logo=socket.io&logoColor=white" alt="Socket.io">
+    <img src="https://img.shields.io/badge/Vanilla_JS-F7DF1E?style=flat&logo=javascript&logoColor=black" alt="Vanilla JS">
+  </div>
 </div>
 
 ---
 
-## 📖 Indice
-- [Introduzione](#-introduzione)
-- [Livello Raggiunto](#-livello-raggiunto-30-e-lode)
-- [Funzionalità Implementate](#-funzionalità-implementate)
-- [Scelte Architetturali](#-scelte-architetturali)
-- [Installazione e Avvio](#-installazione-e-avvio)
-- [Credenziali di Test](#-credenziali-di-test)
+## Descrizione del Progetto
+**Qotly** è un'applicazione web progettata per semplificare il tracciamento delle spese condivise tra gruppi di utenti (es. coinquilini, colleghi o compagni di viaggio). Il sistema integra un algoritmo di ottimizzazione che calcola automaticamente il piano di rimborsi ideale per pareggiare i conti con il minor numero possibile di transazioni finanziarie.
 
 ---
 
-## 🌟 Introduzione
-**Qotly** è un'applicazione web sviluppata come progetto per il corso di "Tecnologie Informatiche per il Web". Permette a coinquilini, gruppi di amici in vacanza o colleghi di tenere traccia delle spese condivise, calcolando matematicamente chi deve rimborsare chi, riducendo al minimo il numero di transazioni necessarie (ottimizzazione dei rimborsi).
+## Funzionalità Principali
 
-## 🏆 Livello Raggiunto: 30 e Lode
-Il progetto è stato sviluppato per soddisfare pienamente tutti i requisiti del **Livello 1** e del **Livello 2**. Inoltre, per ambire al massimo punteggio, sono state sviluppate **tre distinte estensioni di Livello 3**:
-1. **Sincronizzazione Real-Time**: tramite `Socket.io`, le spese inserite da un utente compaiono istantaneamente sugli schermi degli altri partecipanti senza bisogno di ricaricare la pagina.
-2. **Esportazione Report Avanzata in PDF**: utilizzando la libreria `pdfkit`, è possibile scaricare un riepilogo finanziario paginato e finemente formattato del gruppo.
-3. **Grafici Analitici**: Integrazione di un grafico a torta (`Chart.js`) interattivo per la scomposizione delle spese per categoria.
+### Gestione Utenti e Gruppi
+* **Autenticazione Sicura**: Registrazione e accesso con persistenza dei dati.
+* **Organizzazione in Gruppi**: Creazione di spazi condivisi e partecipazione tramite codici d'invito univoci.
+* **Dashboard Personale**: Visualizzazione immediata del bilancio complessivo, debiti e crediti.
 
----
+### Gestione Finanziaria
+* **Tracciamento Spese**: Registrazione dettagliata con categorie, pagatore e partecipanti coinvolti.
+* **Ripartizione Granulare**: Possibilità di includere o escludere membri specifici da ogni singola spesa.
+* **Ottimizzazione Rimborsi**: Algoritmo per la minimizzazione delle transazioni tra i membri.
 
-## ✨ Funzionalità Implementate
-
-### Livello 1 (Base)
-- ✅ Registrazione e Autenticazione (persistenza su database locale simulato).
-- ✅ Creazione di nuovi Gruppi e generazione del Codice Invito.
-- ✅ Partecipazione ai gruppi tramite Codice Invito.
-- ✅ Inserimento di una nuova Spesa (con importo, descrizione e pagatore).
-- ✅ Calcolo automatico e visualizzazione dei saldi di ciascun utente.
-
-### Livello 2 (Avanzato)
-- ✅ **Suddivisione Spese Avanzata**: possibilità di selezionare e deselezionare i partecipanti coinvolti in ogni specifica spesa.
-- ✅ **Storico Dettagliato**: timeline di tutte le spese effettuate nel gruppo e dei rimborsi pregressi.
-- ✅ **Ottimizzazione Rimborsi**: algoritmo matematico che calcola la rete di rimborsi minima (chi deve dare quanto a chi).
-- ✅ **Gestione dei Rimborsi**: registrazione di un rimborso per azzerare o ridurre i debiti.
-- ✅ **Categorie di Spesa**: classificazione delle spese con icone identificative.
-
-### Livello 3 (Extra)
-- 🚀 **Dashboard Live (WebSockets)** per la notifica in tempo reale dell'inserimento di nuove spese e rimborsi.
-- 🚀 **Esportazione in PDF** con layout formattato, intestazioni colorate, riepiloghi e tabelle "zebra".
-- 🚀 **Grafico a Torta** interattivo nella dashboard per analizzare la distribuzione delle spese per categoria (Cibo, Trasporti, Alloggio, ecc).
+### Moduli Avanzati
+* **Real-Time Sync**: Aggiornamento istantaneo dell'interfaccia tramite WebSockets.
+* **Reporting PDF**: Generazione di report finanziari formattati e pronti per la stampa.
+* **Analisi Grafica**: Visualizzazione interattiva della distribuzione delle spese per categoria.
 
 ---
 
-## 🏗️ Scelte Architetturali
+## Stack Tecnologico
 
-Il progetto aderisce rigorosamente alle regole e best-practices del corso:
-1. **Frontend "Vanilla"**: Tutto il design è stato realizzato partendo da zero con **CSS Puro**, utilizzando Flexbox e Grid (assenza totale di framework come Bootstrap o Tailwind). Per la logica lato client è stato usato JavaScript Vanilla con approccio a componenti funzionali e utilizzo massiccio di Fetch API.
-2. **Backend Express (MVC)**: Il backend Node.js è strutturato secondo il pattern *Model-View-Controller*. Le logiche di business (come l'algoritmo di calcolo dei rimborsi minimi in `balanceCalculator.js`) sono isolate dalle rotte HTTP. Il progetto fa uso esclusivo di Moduli ES6 (`import`/`export`).
-3. **Database Simulata**: Per conformità alle richieste di non utilizzare DBMS esterni (SQL/NoSQL), l'intero stato dell'applicazione è persistito asincronamente in un file JSON locale (`data/db.json`) utilizzando il modulo nativo `fs/promises`.
-
----
-
-## 🚀 Installazione e Avvio
-
-Assicurati di avere [Node.js](https://nodejs.org/) (versione 18 o superiore) installato sul tuo sistema.
-
-1. **Scarica o clona il repository** e naviga nella cartella del progetto:
-   ```bash
-   cd progetto-tiw
-   ```
-2. **Installa le dipendenze** del server (Express, Socket.io, PDFKit, ecc.):
-   ```bash
-   npm install
-   ```
-3. **Avvia il server**:
-   ```bash
-   node .\server.js
-   ```
-4. **Apri il browser** all'indirizzo:
-   [http://localhost:3000](http://localhost:3000)
+<table width="100%">
+  <tr>
+    <td width="50%"><strong>Backend</strong></td>
+    <td width="50%">Node.js, Express</td>
+  </tr>
+  <tr>
+    <td><strong>Frontend</strong></td>
+    <td>HTML5, CSS3 (Flexbox/Grid), Vanilla JavaScript (ES6+)</td>
+  </tr>
+  <tr>
+    <td><strong>Comunicazione</strong></td>
+    <td>Socket.io (WebSockets)</td>
+  </tr>
+  <tr>
+    <td><strong>Data Persistence</strong></td>
+    <td>File System JSON (Local Storage simulato)</td>
+  </tr>
+  <tr>
+    <td><strong>Librerie Extra</strong></td>
+    <td>PDFKit (Report), Chart.js (Grafici)</td>
+  </tr>
+</table>
 
 ---
 
-## 🔑 Credenziali di Test
+## Installazione e Avvio
 
-Per facilitare la fase di testing dell'applicativo senza dover necessariamente registrare nuovi utenti, il database precompilato (`db.json`) offre i seguenti profili di test:
+### Prerequisiti
+* **Node.js**: versione 18.x o superiore
+* **NPM**: incluso con Node.js
 
-| Utente          | Email                    | Password     | Ruolo (es. nei Gruppi)   |
-|-----------------|--------------------------|--------------|--------------------------|
-| **Marco Rossi** | `marco@example.com`      | `password123`| Admin ("Vacanze Roma")   |
-| **Giulia Bianchi**| `giulia@example.com`   | `password123`| Admin ("Spese Casa")     |
-| **Luca Verdi**  | `luca@example.com`       | `password123`| Utente normale           |
-| **Sofia Neri**  | `sofia@example.com`      | `password123`| Admin ("Regalo Laurea")  |
+### Procedura di Configurazione
+1.  **Clonazione**: Entrare nella directory del progetto.
+    ```bash
+    cd progetto-tiw
+    ```
+2.  **Dipendenze**: Installare i pacchetti necessari.
+    ```bash
+    npm install
+    ```
+3.  **Esecuzione**: Avviare il server locale.
+    ```bash
+    node server.js
+    ```
+4.  **Accesso**: Aprire il browser all'indirizzo [http://localhost:3000](http://localhost:3000).
 
-Prova ad accedere in due finestre diverse con due utenti dello stesso gruppo (es. Marco e Luca) per testare l'algoritmo di **Sincronizzazione in Tempo Reale**!
+---
 
-<p align="center">
-  <i>Progetto per Tecnologie Informatiche per il Web</i>
-</p>
+## Credenziali di Test
+
+Utilizza questi account preconfigurati per testare le funzionalità di gruppo e la sincronizzazione real-time:
+
+| Utente | Email | Password | Ruolo Esempio |
+| :--- | :--- | :--- | :--- |
+| **Marco Rossi** | `marco@example.com` | `password123` | Admin (Vacanze Roma) |
+| **Giulia Bianchi** | `giulia@example.com` | `password123` | Admin (Spese Casa) |
+| **Luca Verdi** | `luca@example.com` | `password123` | Utente Standard |
+| **Sofia Neri** | `sofia@example.com` | `password123` | Admin (Regalo Laurea) |
+
+---
+<div align="center">
+  <p><i>Progetto sviluppato per il corso di Tecnologie Informatiche per il Web</i></p>
+</div>
