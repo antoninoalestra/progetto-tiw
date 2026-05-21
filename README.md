@@ -1,104 +1,227 @@
-<div align="center">
-  <img src="https://img.icons8.com/color/96/000000/wallet--v1.png" alt="Qotly Logo" width="80">
-  <h1>Qotly</h1>
-  <p><strong>Sistema Avanzato per la Gestione delle Spese di Gruppo</strong></p>
-  
-  <div>
-    <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
-    <img src="https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white" alt="Express">
-    <img src="https://img.shields.io/badge/Socket.io-010101?style=flat&logo=socket.io&logoColor=white" alt="Socket.io">
-    <img src="https://img.shields.io/badge/Vanilla_JS-F7DF1E?style=flat&logo=javascript&logoColor=black" alt="Vanilla JS">
-  </div>
-</div>
+# Qotly — Sistema di Gestione Spese di Gruppo
+
+Progetto per il corso di Tecnologie Informatiche per il Web (TIW) — A.A. 2025/2026
 
 ---
 
-## Descrizione del Progetto
-**Qotly** è un'applicazione web progettata per semplificare il tracciamento delle spese condivise tra gruppi di utenti (es. coinquilini, colleghi o compagni di viaggio). Il sistema integra un algoritmo di ottimizzazione che calcola automaticamente il piano di rimborsi ideale per pareggiare i conti con il minor numero possibile di transazioni finanziarie.
+## Descrizione
+
+Qotly e' un'applicazione web per la gestione delle spese condivise tra gruppi di utenti. Il sistema permette di registrare le spese sostenute dai membri di un gruppo, calcolare i saldi individuali e determinare il piano di rimborsi ottimale, minimizzando il numero di transazioni necessarie per pareggiare i conti.
+
+I casi d'uso tipici includono la gestione delle spese tra coinquilini, la suddivisione dei costi durante viaggi o cene di gruppo e la rendicontazione di spese condivise in contesti lavorativi.
+
+Il progetto implementa la Traccia 6 (Gestione Spese di Gruppo) e copre il Livello 1, il Livello 2 e parzialmente il Livello 3.
 
 ---
 
-## Funzionalità Principali
+## Funzionalita' implementate
 
-### Gestione Utenti e Gruppi
-* **Autenticazione Sicura**: Registrazione e accesso con persistenza dei dati.
-* **Organizzazione in Gruppi**: Creazione di spazi condivisi e partecipazione tramite codici d'invito univoci.
-* **Dashboard Personale**: Visualizzazione immediata del bilancio complessivo, debiti e crediti.
+### Livello 1 — Nucleo funzionale
 
-### Gestione Finanziaria
-* **Tracciamento Spese**: Registrazione dettagliata con categorie, pagatore e partecipanti coinvolti.
-* **Ripartizione Granulare**: Possibilità di includere o escludere membri specifici da ogni singola spesa.
-* **Ottimizzazione Rimborsi**: Algoritmo per la minimizzazione delle transazioni tra i membri.
+- Registrazione e autenticazione degli utenti
+- Creazione di gruppi con generazione automatica di un codice di invito univoco
+- Partecipazione a un gruppo esistente tramite codice di invito
+- Inserimento di spese con importo, descrizione, pagatore e partecipanti coinvolti
+- Visualizzazione delle spese del gruppo
+- Calcolo e visualizzazione del saldo netto di ciascun partecipante
+- Dashboard personale con riepilogo di debiti, crediti e spese recenti
 
-### Moduli Avanzati
-* **Real-Time Sync**: Aggiornamento istantaneo dell'interfaccia tramite WebSockets.
-* **Reporting PDF**: Generazione di report finanziari formattati e pronti per la stampa.
-* **Analisi Grafica**: Visualizzazione interattiva della distribuzione delle spese per categoria.
+### Livello 2 — Funzionalita' avanzate
 
----
+- Divisione per quote personalizzate: ogni partecipante puo' contribuire con un importo diverso
+- Esclusione selettiva di membri da una specifica spesa
+- Registrazione di rimborsi tra utenti
+- Algoritmo di ottimizzazione dei rimborsi: calcola il numero minimo di transazioni per azzerare tutti i debiti (algoritmo greedy con accoppiamento debitore-creditore massimi)
+- Storico dei rimborsi effettuati, separato dai rimborsi suggeriti
+- Categorie di spesa (Cibo, Trasporti, Alloggio, Intrattenimento, Materiali, Generale)
+- Gestione dei membri del gruppo da parte dell'amministratore (rimozione, chiusura del gruppo)
 
-## Stack Tecnologico
+### Livello 3 — Estensioni
 
-<table width="100%">
-  <tr>
-    <td width="50%"><strong>Backend</strong></td>
-    <td width="50%">Node.js, Express</td>
-  </tr>
-  <tr>
-    <td><strong>Frontend</strong></td>
-    <td>HTML5, CSS3 (Flexbox/Grid), Vanilla JavaScript (ES6+)</td>
-  </tr>
-  <tr>
-    <td><strong>Comunicazione</strong></td>
-    <td>Socket.io (WebSockets)</td>
-  </tr>
-  <tr>
-    <td><strong>Data Persistence</strong></td>
-    <td>File System JSON (Local Storage simulato)</td>
-  </tr>
-  <tr>
-    <td><strong>Librerie Extra</strong></td>
-    <td>PDFKit (Report), Chart.js (Grafici)</td>
-  </tr>
-</table>
+- Esportazione del resoconto finanziario del gruppo in formato PDF (tramite PDFKit), con tabella delle spese, storico dei rimborsi e paginazione automatica
+- Grafico interattivo a torta della distribuzione delle spese per categoria (tramite Chart.js)
+- Chiusura del gruppo con generazione automatica dei rimborsi consigliati e cancellazione a cascata di spese e rimborsi associati
 
 ---
 
-## Installazione e Avvio
+## Stack tecnologico
 
-### Prerequisiti
-* **Node.js**: versione 18.x o superiore
-* **NPM**: incluso con Node.js
+| Livello | Tecnologie |
+|---|---|
+| Runtime | Node.js (>= 18.x) |
+| Framework backend | Express 5 |
+| Frontend | HTML5, CSS3, JavaScript (ES6+, Vanilla) |
+| Persistenza | File system JSON (db.json) |
+| Generazione PDF | PDFKit |
+| Grafici | Chart.js (CDN) |
 
-### Procedura di Configurazione
-1.  **Clonazione**: Entrare nella directory del progetto.
-    ```bash
-    cd progetto-tiw
-    ```
-2.  **Dipendenze**: Installare i pacchetti necessari.
-    ```bash
-    npm install
-    ```
-3.  **Esecuzione**: Avviare il server locale.
-    ```bash
-    node server.js
-    ```
-4.  **Accesso**: Aprire il browser all'indirizzo [http://localhost:3000](http://localhost:3000).
+L'applicazione non utilizza un database relazionale o a documenti esterno: i dati sono persistiti in un unico file `data/db.json`, letto e scritto tramite la classe `Database` in `models/Database.js`. Questo approccio e' intenzionale per rispettare i vincoli del progetto didattico.
 
 ---
 
-## Credenziali di Test
+## Struttura del progetto
 
-Utilizza questi account preconfigurati per testare le funzionalità di gruppo e la sincronizzazione real-time:
-
-| Utente | Email | Password | Ruolo Esempio |
-| :--- | :--- | :--- | :--- |
-| **Marco Rossi** | `marco@example.com` | `password123` | Admin (Vacanze Roma) |
-| **Giulia Bianchi** | `giulia@example.com` | `password123` | Admin (Spese Casa) |
-| **Luca Verdi** | `luca@example.com` | `password123` | Utente Standard |
-| **Sofia Neri** | `sofia@example.com` | `password123` | Admin (Regalo Laurea) |
+```
+progetto-tiw/
+|-- controllers/
+|   |-- expenseController.js    # Logica per la gestione delle spese
+|   |-- groupController.js      # Logica per gruppi, membri, PDF
+|   |-- settlementController.js # Logica per i rimborsi
+|   |-- userController.js       # Logica per registrazione, login, profilo e bilanci
+|-- data/
+|   |-- db.json                 # File di persistenza dei dati
+|-- models/
+|   |-- Database.js             # Data Access Layer (lettura/scrittura JSON)
+|-- public/
+|   |-- css/
+|   |   |-- style.css
+|   |-- html/
+|   |   |-- login.html
+|   |   |-- register.html
+|   |   |-- dashboard.html
+|   |   |-- group.html
+|   |-- js/
+|       |-- auth.js             # Logica di registrazione e login
+|       |-- dashboard.js        # Logica della dashboard personale
+|       |-- group.js            # Logica della pagina di gruppo
+|       |-- utils.js            # Funzioni condivise (es. gestione sessione)
+|-- routes/
+|   |-- expenses.js
+|   |-- groups.js
+|   |-- settlements.js
+|   |-- users.js
+|-- utils/
+|   |-- balanceCalculator.js    # Algoritmi di calcolo saldi e ottimizzazione rimborsi
+|-- server.js                   # Entry point dell'applicazione
+|-- package.json
+```
 
 ---
-<div align="center">
-  <p><i>Progetto sviluppato per il corso di Tecnologie Informatiche per il Web</i></p>
-</div>
+
+## Prerequisiti
+
+- **Node.js** versione 18 o superiore
+- **npm** (incluso con Node.js)
+
+Per verificare le versioni installate:
+
+```bash
+node --version
+npm --version
+```
+
+---
+
+## Installazione e avvio
+
+### 1. Clonare il repository
+
+```bash
+git clone https://github.com/antoninoalestra/progetto-tiw.git
+cd progetto-tiw
+```
+
+### 2. Installare le dipendenze
+
+```bash
+npm install
+```
+
+Le uniche dipendenze di produzione sono `express` e `pdfkit`. Non e' necessaria alcuna configurazione di database o variabili d'ambiente.
+
+### 3. Avviare il server
+
+```bash
+node server.js
+```
+
+L'output atteso e':
+
+```
+Server HTTP in ascolto sulla porta 3000
+```
+
+### 4. Aprire l'applicazione
+
+Aprire un browser e navigare a:
+
+```
+http://localhost:3000
+```
+
+Il server reindirizza automaticamente alla pagina di login.
+
+---
+
+## Credenziali di test
+
+Il file `data/db.json` include un set di dati preconfigurati per testare tutte le funzionalita'.
+
+| Nome | Email | Password |
+|---|---|---|
+| Marco Rossi | marco@example.com | password123 |
+| Giulia Bianchi | giulia@example.com | password123 |
+| Luca Verdi | luca@example.com | password123 |
+| Sofia Neri | sofia@example.com | password123 |
+
+I gruppi di test preesistenti includono spese, rimborsi e codici di invito gia' configurati.
+
+Per ripristinare lo stato iniziale dei dati, e' sufficiente sovrascrivere `data/db.json` con il file originale incluso nel repository.
+
+---
+
+## Endpoint API
+
+Tutti gli endpoint sono prefissati con `/api`.
+
+### Utenti — `/api/users`
+
+| Metodo | Percorso | Descrizione |
+|---|---|---|
+| POST | `/register` | Registra un nuovo utente |
+| POST | `/login` | Autenticazione utente |
+| PUT | `/:id` | Aggiorna il profilo utente |
+| GET | `/:userId/balances` | Restituisce i saldi globali dell'utente su tutti i gruppi |
+| GET | `/:userId/expenses` | Restituisce le ultime 5 spese nei gruppi dell'utente |
+
+### Gruppi — `/api/groups`
+
+| Metodo | Percorso | Descrizione |
+|---|---|---|
+| POST | `/` | Crea un nuovo gruppo |
+| POST | `/join` | Unisciti a un gruppo tramite codice di invito |
+| GET | `/user/:userId` | Recupera tutti i gruppi di un utente |
+| GET | `/:groupId` | Recupera i dettagli di un gruppo |
+| GET | `/:groupId/settlements` | Calcola saldi netti e rimborsi suggeriti |
+| POST | `/:groupId/export` | Genera e scarica il report PDF del gruppo |
+| DELETE | `/:groupId/members/:memberId` | Rimuove un membro (solo admin) |
+| DELETE | `/:groupId` | Chiude ed elimina il gruppo (solo admin) |
+
+### Spese — `/api/expenses`
+
+| Metodo | Percorso | Descrizione |
+|---|---|---|
+| POST | `/` | Aggiunge una nuova spesa al gruppo |
+| GET | `/group/:groupId` | Recupera tutte le spese di un gruppo |
+
+### Rimborsi — `/api/settlements`
+
+| Metodo | Percorso | Descrizione |
+|---|---|---|
+| POST | `/` | Registra un rimborso tra due utenti |
+
+---
+
+## Note implementative
+
+### Autenticazione
+
+Il login restituisce un token casuale generato con `crypto.randomBytes`. Questo token non viene verificato lato server nelle richieste successive: l'identita' dell'utente viene passata tramite i campi `requesterId`/`adminId` nel corpo delle richieste. Questa scelta e' consapevole e rappresenta una semplificazione adatta al contesto didattico del progetto; in un'applicazione di produzione si utilizzerebbe JWT o un meccanismo di sessione server-side.
+
+### Algoritmo di ottimizzazione rimborsi
+
+L'algoritmo implementato in `utils/balanceCalculator.js` calcola prima i saldi netti di ogni utente (crediti meno debiti, considerando anche i rimborsi gia' effettuati), poi applica un approccio greedy iterativo: ad ogni passo accoppia il debitore con il debito maggiore al creditore con il credito maggiore, generando una transazione pari al minimo tra i due importi. Il risultato e' un insieme di transazioni che azzera tutti i saldi con il numero minimo di passaggi.
+
+### Persistenza
+
+Tutte le operazioni di lettura e scrittura sul file `data/db.json` sono gestite dalla classe `Database` in `models/Database.js`, che espone i metodi `getAll`, `getById`, `insert`, `update` e `delete`. Ogni scrittura sovrascrive l'intero file; per applicazioni con carico elevato sarebbe necessario un database dedicato.
