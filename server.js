@@ -1,7 +1,6 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createServer } from 'http';
 import userRoutes from './routes/users.js';
 import groupRoutes from './routes/groups.js';
 import expenseRoutes from './routes/expenses.js';
