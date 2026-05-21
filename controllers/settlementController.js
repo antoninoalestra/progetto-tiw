@@ -35,11 +35,6 @@ export const addSettlement = async (req, res) => {
     // Salva nella collezione "settlements"
     const newSettlement = await Database.insert('settlements', settlementData);
 
-    // Emetti evento socket per aggiornare in real-time
-    if (req.io) {
-      req.io.to(`group_${groupId}`).emit('update_data', { type: 'settlement', data: newSettlement });
-    }
-
     res.status(201).json(newSettlement);
   } catch (error) {
     console.error('Errore durante la registrazione del rimborso:', error);

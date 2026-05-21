@@ -43,18 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<span class="avatar" style="background:${bg};">${init}</span>`;
     }
 
-    // WebSockets setup
-    const socket = io();
-    socket.emit('join_group', groupId);
-
-    socket.on('update_data', (message) => {
-        // Se qualcun altro ha aggiunto spese/rimborsi, ricarica
-        console.log('Nuovi dati ricevuti via socket:', message);
-        window.showNotification('Dati aggiornati in tempo reale!', false);
-        loadExpenses();
-        loadSettlements();
-    });
-
 
     // Modal Logic
     const expenseModal = document.getElementById('expense-modal');

@@ -85,11 +85,6 @@ export const addExpense = async (req, res) => {
     // Salva nel database (l'ID viene generato automaticamente dal DAL)
     const savedExpense = await Database.insert('expenses', newExpense);
 
-    // Emetti evento socket per aggiornare gli altri client in real-time
-    if (req.io) {
-      req.io.to(`group_${groupId}`).emit('update_data', { type: 'expense', data: savedExpense });
-    }
-
     res.status(201).json({ message: 'Spesa aggiunta con successo.', expense: savedExpense });
   } catch (error) {
     console.error('Errore durante l\'aggiunta della spesa:', error);
