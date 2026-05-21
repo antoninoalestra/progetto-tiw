@@ -1,252 +1,279 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Qotly - Gestione Spese di Gruppo</title>
-    <link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Qotly - Dashboard</title>
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/dashboard.css">
 </head>
 <body>
 
-    <!-- TOP NAVBAR FISSA IN ALTO -->
-    <nav class="top-navbar">
-        <div class="logo">Qotly</div>
-        
-        <!-- Navigazione Principale -->
-        <ul class="nav-links" id="main-nav">
-            <li class="nav-item active" data-target="tab-home">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                <span>Dashboard</span>
-            </li>
-            <li class="nav-item" data-target="tab-groups">
-                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <span>Gruppi</span>
-            </li>
-            <!-- Pulsante Nuovo che aprirà una modale invece di cambiare tab -->
-            <li class="nav-item" id="nav-btn-nuovo">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                <span>Nuovo</span>
-            </li>
-        </ul>
+  <div class="app-layout">
+    
+    <!-- SIDEBAR DESKTOP -->
+    <aside class="sidebar-layout" id="app-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          Qotly
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav" id="main-nav">
+        <a href="#" class="nav-link active" data-target="tab-home">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Dashboard
+        </a>
+        <a href="#" class="nav-link" data-target="tab-groups">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          I miei gruppi
+        </a>
+        <a href="#" class="nav-link" id="nav-btn-nuovo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          Nuovo Gruppo
+        </a>
+        <a href="#" class="nav-link" data-target="tab-profile">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Profilo
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="#" class="nav-link logout-action" id="sidebar-logout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Esci
+        </a>
+      </div>
+    </aside>
 
-        <div class="navbar-right">
-            <!-- Avatar dell'utente loggato (funge anche da link al profilo) -->
-            <div class="user-profile-badge nav-item" data-target="tab-profile" id="top-profile-avatar-letter" title="Profilo Utente">U</div>
-            <!-- Bottone di Logout -->
-            <button id="top-logout-btn" class="btn-logout" title="Esci dall'Account">
-                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                <span class="desktop-only">Esci</span>
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+      
+      <header class="topbar">
+        <div class="topbar-left">
+          <div style="font-size: 20px; font-weight: 700; color: var(--color-brand-600);" class="mobile-only">Qotly</div>
+        </div>
+        <div class="topbar-right">
+        </div>
+      </header>
+
+      <main class="page-content">
+        
+        <!-- TAB: DASHBOARD -->
+        <section id="tab-home" class="tab-content active animate-in">
+          
+          <div class="hero-balance-card">
+            <div class="hero-label">Bilancio Totale</div>
+            <div class="hero-amount tabular-nums" id="net-balance-value">€0.00</div>
+            <div class="hero-chips">
+              <div class="hero-chip positive">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                Devi ricevere: <span id="total-credit">€0.00</span>
+              </div>
+              <div class="hero-chip negative">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                Devi dare: <span id="total-owed">€0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid" id="dashboard-stats">
+            <!-- Statistiche Popolate via JS -->
+            <div class="card stat-card">
+              <span class="stat-label">Spese Totali</span>
+              <span class="stat-value tabular-nums" id="stat-total-expenses">€0.00</span>
+            </div>
+            <div class="card stat-card">
+              <span class="stat-label">Gruppi Attivi</span>
+              <span class="stat-value tabular-nums" id="stat-active-groups">0</span>
+            </div>
+            <div class="card stat-card">
+              <span class="stat-label">Da rimborsare</span>
+              <span class="stat-value tabular-nums" id="stat-my-share">€0.00</span>
+            </div>
+          </div>
+
+          <div class="dashboard-widgets">
+            
+            <!-- Feed Attività Recente -->
+            <div class="card">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 16px;">Attività Recente</h3>
+              </div>
+              <div class="feed-list" id="recent-expenses-list">
+                <!-- Inserito dinamicamente via JS -->
+              </div>
+            </div>
+
+            <!-- Dettagli per Gruppo -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="margin: 0; font-size: 16px;">Settle Up</h3>
+              </div>
+              <div class="card-body" style="padding: 0;">
+                <div id="balances-loading" style="padding: 24px;"></div>
+                <div class="feed-list" id="balances-details" style="max-height: 400px; overflow-y: auto;">
+                  <!-- Inserito dinamicamente via JS -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- TAB: GRUPPI -->
+        <section id="tab-groups" class="tab-content" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h1 style="margin: 0;">I Miei Gruppi</h1>
+            <button id="alt-nuovo-gruppo-btn" class="btn btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span class="desktop-only">Crea Gruppo</span>
             </button>
-        </div>
-    </nav>
-
-    <main class="container">
-        
-        <!-- ============================================== -->
-        <!-- TAB 1: HOME (DASHBOARD GLOBALE) -->
-        <!-- ============================================== -->
-        <section id="tab-home" class="tab-content active">
-            
-            <div class="desktop-only" style="margin-bottom: 2rem;">
-                <h2 style="font-size: 2.2rem; font-family: var(--font-heading); font-weight: 700; margin-bottom: 0.3rem;">Ciao, <span id="welcome-text"></span>!</h2>
-                <p style="color: var(--text-muted); font-size: 1.05rem;">Bentornato nella tua dashboard finanziaria.</p>
-            </div>
-
-            <!-- Mobile Greeting -->
-            <div class="mobile-only app-header-mobile">
-                <p class="mobile-greeting">Ciao, <span class="mobile-welcome-name"></span></p>
-            </div>
-
-            <!-- Nuovo Layout a Colonne (Applicato solo su Desktop) -->
-            <div class="dashboard-layout">
-                
-                <!-- COLONNA SINISTRA: Sidebar Bilancio Netto -->
-                <div class="sidebar">
-                    <div class="net-balance-card">
-                        <span class="net-balance-label">Bilancio Netto</span>
-                        <h1 id="net-balance-value" class="net-balance-amount" style="font-size: clamp(2rem, 5vw, 3.2rem);">€0.00</h1>
-                        
-                        <div class="balance-sub-row" style="flex-direction: column; background: transparent; padding: 0; border: none; align-items: stretch; gap: 1rem;">
-                            <!-- Da Dare -->
-                            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02);">
-                                <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Da Dare</span>
-                                <strong class="amount-negative" id="total-owed" style="display: block; font-size: 1.5rem; margin-top: 0.3rem;">€0.00</strong>
-                            </div>
-                            <!-- Da Ricevere -->
-                            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02);">
-                                <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Da Ricevere</span>
-                                <strong class="amount-positive" id="total-credit" style="display: block; font-size: 1.5rem; margin-top: 0.3rem;">€0.00</strong>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- COLONNA DESTRA: Contenuto Principale -->
-                <div class="main-content" style="display: flex; flex-direction: column; gap: 2rem;">
-                    
-                    <!-- Spese Recenti -->
-                    <div class="card">
-                        <h3>Spese Recenti</h3>
-                        <div class="expenses-table-wrapper desktop-only">
-                            <table class="expenses-table">
-                                <thead>
-                                    <tr>
-                                        <th>Spesa</th>
-                                        <th>Gruppo</th>
-                                        <th>Importo</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recent-expenses-list">
-                                    <!-- Popolato dinamicamente via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Lista Edge-to-Edge per Mobile -->
-                        <div class="mobile-only" id="mobile-recent-expenses-list" style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem;">
-                            <!-- Popolato dinamicamente via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Portafoglio Rapido / Dettaglio Gruppi ridotto -->
-                    <div class="card" id="balances-widget">
-                        <h3>Dettagli per Gruppo</h3>
-                        <p style="margin-bottom: 1.5rem;">Un riepilogo rapido del tuo stato per gruppo.</p>
-                        
-                        <div id="balances-loading" style="text-align: center; padding: 2rem; color: var(--primary-color);">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></path></svg>
-                        </div>
-                        
-                        <div id="balances-content" style="display: none;">
-                            <div id="balances-details" style="max-height: 350px; overflow-y: auto;" class="desktop-only">
-                                <!-- Inserito dinamicamente via JS -->
-                            </div>
-                            <div id="mobile-balances-details" class="mobile-only edge-to-edge-list">
-                                <!-- Inserito dinamicamente via JS -->
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+          </div>
+          
+          <div id="groups-list" class="groups-grid">
+            <!-- Popolato dinamicamente via JS -->
+          </div>
         </section>
 
-        <!-- ============================================== -->
-        <!-- TAB 2: I MIEI GRUPPI -->
-        <!-- ============================================== -->
-        <section id="tab-groups" class="tab-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="font-size: 2rem; margin: 0;">I Miei Gruppi</h2>
-                <button id="alt-nuovo-gruppo-btn" class="btn btn-primary" style="font-size: 0.9rem;">+ Nuovo</button>
-            </div>
-            
-            <!-- Desktop Layout -->
-            <div class="desktop-only" style="background: transparent; border: none; box-shadow: none; padding: 0;">
-                <div id="groups-list" class="groups-grid">
-                    <!-- Le card verranno inserite dinamicamente qui dal JS -->
+        <!-- TAB: PROFILO -->
+        <section id="tab-profile" class="tab-content" style="display: none;">
+          <h1 style="margin-bottom: 24px;">Il Tuo Profilo</h1>
+          
+          <div class="card" style="max-width: 520px;">
+            <div class="card-body">
+              <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 32px;">
+                <div class="avatar avatar-lg" id="profile-avatar-letter" style="background: var(--color-brand-500); width: 80px; height: 80px; font-size: 32px;">U</div>
+                <div>
+                  <h2 id="welcome-text" style="margin-bottom: 4px;">Utente</h2>
+                  <p>Aggiorna le tue informazioni personali</p>
                 </div>
-            </div>
-            
-            <!-- Mobile Layout Edge-to-Edge -->
-            <div class="mobile-only app-list-container">
-                <div id="mobile-groups-list" class="edge-to-edge-list">
-                    <!-- Le righe verranno inserite dinamicamente qui dal JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================== -->
-        <!-- TAB 3: PROFILO -->
-        <!-- ============================================== -->
-        <section id="tab-profile" class="tab-content">
-            <div class="card" style="max-width: 500px; margin: 0 auto;">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <div style="width: 80px; height: 80px; background: var(--accent-gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);">
-                        <span id="profile-avatar-letter">U</span>
-                    </div>
-                    <h2>Il Tuo Profilo</h2>
-                </div>
-                
-                <form id="profile-form">
+              </div>
+              
+              <form id="profile-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="input-group">
                     <label for="profile-name">Nome</label>
-                    <input type="text" id="profile-name" required>
-
+                    <input type="text" id="profile-name" class="input" required>
+                  </div>
+                  <div class="input-group">
                     <label for="profile-cognome">Cognome</label>
-                    <input type="text" id="profile-cognome" required>
-                    
-                    <label for="profile-email">Indirizzo Email</label>
-                    <input type="email" id="profile-email" required>
-                    
-                    <label for="profile-password">Nuova Password</label>
-                    <input type="password" id="profile-password" placeholder="Lascia vuoto per non cambiare">
-                    
-                    <button type="submit" style="margin-top: 1rem; margin-bottom: 1rem;">Salva Modifiche</button>
-                </form>
+                    <input type="text" id="profile-cognome" class="input" required>
+                  </div>
+                </div>
+                
+                <div class="input-group">
+                  <label for="profile-email">Indirizzo Email</label>
+                  <input type="email" id="profile-email" class="input" required>
+                </div>
+                
+                <div class="input-group">
+                  <label for="profile-password">Nuova Password</label>
+                  <input type="password" id="profile-password" class="input" placeholder="Lascia vuoto per non cambiare">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Salva Modifiche</button>
+              </form>
             </div>
+          </div>
         </section>
 
-    </main>
-
-    <!-- ============================================== -->
-    <!-- MODALI -->
-    <!-- ============================================== -->
-
-    <!-- Modal: NUOVO GRUPPO (Crea o Unisciti) -->
-    <div id="new-group-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 700px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="margin: 0; font-family: var(--font-heading);">Gestione Gruppi</h2>
-                <button id="close-new-group-modal" class="close-btn">&times;</button>
-            </div>
-            
-            <div class="dashboard-layout" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <!-- Crea Gruppo -->
-                <div class="card" style="padding: 1.5rem; text-align: center; background: rgba(255,255,255,0.01);">
-                    <div style="width: 50px; height: 50px; background: rgba(59, 130, 246, 0.08); color: var(--primary-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 1rem;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                    </div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Crea Nuovo Gruppo</h3>
-                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Genera un codice da condividere.</p>
-                    <form id="create-group-form" style="width: 100%;">
-                        <input type="text" id="group-name" required placeholder="Es. Viaggio a Parigi" style="text-align: center;">
-                        <button type="submit" style="margin-top: 0.5rem; width: 100%;">Crea Gruppo</button>
-                    </form>
-                </div>
-
-                <!-- Unisciti -->
-                <div class="card" style="padding: 1.5rem; text-align: center; background: rgba(255,255,255,0.01);">
-                    <div style="width: 50px; height: 50px; background: rgba(59, 130, 246, 0.08); color: var(--primary-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; margin: 0 auto 1rem;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    </div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Unisciti a un Gruppo</h3>
-                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Hai un codice di invito?</p>
-                    <form id="join-group-form" style="width: 100%;">
-                        <input type="text" id="invite-code" required placeholder="Es. ABC123" maxlength="6" style="text-transform: uppercase; letter-spacing: 5px; font-weight: 800; text-align: center; font-size: 1.2rem; background: rgba(255, 255, 255, 0.03); border: 2px dashed var(--primary-color); color: var(--text-main);">
-                        <button type="submit" style="margin-top: 0.5rem; width: 100%; background: var(--accent-gradient); color: white;">Entra nel Gruppo</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+      </main>
     </div>
+  </div>
 
-    <!-- QUICK ACTION SETTLE UP MODAL -->
-    <div id="settle-up-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="margin: 0; font-family: var(--font-heading);">Settle Up</h2>
-                <button id="close-settle-modal" class="close-btn">&times;</button>
-            </div>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
-                Seleziona un gruppo per visualizzare i rimborsi suggeriti ed estinguere il debito.
-            </p>
-            <div id="settle-up-groups-list" style="display: flex; flex-direction: column; gap: 0.8rem; max-height: 300px; overflow-y: auto; padding-right: 0.3rem;">
-                <!-- Popolato dinamicamente via JS -->
-            </div>
-        </div>
+  <!-- BOTTOM NAV (Mobile) -->
+  <nav class="bottom-nav mobile-only">
+    <div class="bottom-nav-inner">
+      <a href="#" class="bnav-link active" data-target="tab-home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+      </a>
+      <a href="#" class="bnav-link" data-target="tab-groups">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Gruppi</span>
+      </a>
+      <a href="#" class="bnav-link" onclick="document.getElementById('nav-btn-nuovo').click(); return false;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        <span>Nuovo</span>
+      </a>
+      <a href="#" class="bnav-link" data-target="tab-profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profilo</span>
+      </a>
     </div>
+  </nav>
 
-    <script src="../js/utils.js"></script>
-    <script src="../js/dashboard.js"></script>
+  <!-- MODAL: NUOVO GRUPPO -->
+  <div id="new-group-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; font-size: 20px;">Gestione Gruppi</h2>
+        <button id="close-new-group-modal" class="btn-ghost" style="padding: 8px; border-radius: 50%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      
+      <div class="tabs">
+        <div class="tab-item tab-active" onclick="showGroupTab('create')">Crea Nuovo</div>
+        <div class="tab-item" onclick="showGroupTab('join')">Unisciti</div>
+      </div>
+
+      <!-- Tab Content: Crea -->
+      <div id="group-tab-create" style="display: block; padding-top: 8px;">
+        <p style="color: var(--text-muted); margin-bottom: 24px;">Crea un nuovo gruppo e invita i tuoi amici per dividere le spese.</p>
+        <form id="create-group-form">
+          <div class="input-group">
+            <label for="group-name">Nome del Gruppo</label>
+            <input type="text" id="group-name" class="input" required placeholder="Es. Viaggio a Parigi">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Crea Gruppo</button>
+        </form>
+      </div>
+
+      <!-- Tab Content: Unisciti -->
+      <div id="group-tab-join" style="display: none; padding-top: 8px;">
+        <p style="color: var(--text-muted); margin-bottom: 24px;">Hai un codice di invito? Inseriscilo qui sotto per entrare nel gruppo.</p>
+        <form id="join-group-form">
+          <div class="input-group">
+            <label for="invite-code">Codice Invito</label>
+            <input type="text" id="invite-code" class="input" required placeholder="Es. ABC123" maxlength="6" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 20px; letter-spacing: 4px; text-align: center;">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Entra nel Gruppo</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple tab logic for the modal
+    function showGroupTab(tab) {
+      document.getElementById('group-tab-create').style.display = tab === 'create' ? 'block' : 'none';
+      document.getElementById('group-tab-join').style.display = tab === 'join' ? 'block' : 'none';
+      const tabs = document.querySelectorAll('#new-group-modal .tab-item');
+      tabs[0].className = tab === 'create' ? 'tab-item tab-active' : 'tab-item';
+      tabs[1].className = tab === 'join' ? 'tab-item tab-active' : 'tab-item';
+    }
+
+    // Close sidebar on link click (mobile)
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if(window.innerWidth < 768) {
+          document.getElementById('app-sidebar').classList.remove('open');
+        }
+      });
+    });
+  </script>
+  
+  <script type="module" src="../js/ui/toast.js"></script>
+  <script type="module" src="../js/ui/toast.js"></script>
+  <script type="module" src="../js/ui/skeleton.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/dashboard.js"></script>
 </body>
 </html>

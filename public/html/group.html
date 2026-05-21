@@ -2,183 +2,288 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Dettaglio Gruppo - Qotly</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/group.css">
 </head>
 <body>
 
-  <!-- TOP NAVBAR FISSA IN ALTO -->
-  <nav class="top-navbar">
-      <div class="logo">
-          <a href="dashboard.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-              Qotly
-          </a>
-      </div>
-      <div class="navbar-right">
-          <button id="top-logout-btn" class="btn-logout" title="Esci dall'Account">
-              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-              <span class="desktop-only">Esci</span>
-          </button>
-      </div>
-  </nav>
-
-  <main class="container">
+  <div class="app-layout">
     
-    <div class="top-bar-inner">
-      <div class="top-bar-left">
-        <h1 id="group-title" style="font-size: 1.8rem; margin: 0; line-height: 1;"><span class="skeleton-title"></span></h1>
-        <div id="invite-code-container" style="display: none; align-items: center; gap: 0.5rem; margin-top: 0.4rem;">
-          <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Codice Invito:</span> 
-          <span class="code-badge" id="group-invite-code" style="padding: 0.2rem 0.6rem; font-size: 0.95rem;"></span>
-        </div>
-      </div>
-      <div class="top-bar-right">
-        <!-- Esporta PDF -->
-        <a id="export-pdf-btn" href="#" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-           <span class="desktop-only">PDF Report</span>
+    <!-- SIDEBAR DESKTOP -->
+    <aside class="sidebar-layout" id="app-sidebar">
+      <div class="sidebar-header">
+        <a href="dashboard.html" class="sidebar-brand">
+          Qotly
         </a>
       </div>
-    </div>
-    
-    <!-- MOBILE-ONLY TAB MENU -->
-    <div class="mobile-only mobile-group-tabs">
-        <button class="m-tab active" data-target="m-spese">Spese</button>
-        <button class="m-tab" data-target="m-saldi">Saldi</button>
-        <button class="m-tab" data-target="m-membri">Membri</button>
-    </div>
-
-    <!-- Layout a colonne Desktop (Sidebar sinistra, Main destro) -->
-    <div class="group-layout">
       
-      <!-- COLONNA SINISTRA (Sidebar) -->
-      <div class="sidebar" style="display: flex; flex-direction: column; gap: 1.8rem;">
-        
-        <!-- SEZIONE: Membri del Gruppo -->
-        <section class="card m-section m-membri">
-          <h2>Membri del Gruppo</h2>
-          <div id="members-list" style="display: flex; flex-direction: column; gap: 0.8rem;">
-            <!-- Popolato via JS -->
-          </div>
-        </section>
-
-        <!-- SEZIONE: Rimborsi Suggeriti -->
-        <section class="card m-section m-saldi">
-          <h2>Rimborsi Suggeriti</h2>
-          <p style="font-size: 0.85rem; margin-bottom: 1.2rem; color: var(--text-muted);">
-            Rimborsi minimi suggeriti per azzerare i conti del gruppo.
-          </p>
-          <div id="suggested-settlements-list">
-            <!-- Popolato via JS -->
-          </div>
-        </section>
-        
-        <!-- SEZIONE: Storico Rimborsi Effettuati -->
-        <section class="card m-section m-saldi">
-          <h2>Storico Rimborsi</h2>
-          <div id="past-settlements-list" style="display: flex; flex-direction: column; gap: 0.8rem;">
-            <!-- Popolato via JS -->
-          </div>
-        </section>
-
-        <!-- SEZIONE: Admin (Chiudi Gruppo) -->
-        <section id="admin-section" class="card" style="display: none; border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.02);">
-          <h2>Amministrazione</h2>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">La chiusura del gruppo è irreversibile. Tutte le spese e i rimborsi verranno eliminati.</p>
-          <button id="close-group-btn" class="btn btn-logout" style="width: 100%; justify-content: center; padding: 0.7rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            Chiudi Gruppo (Elimina)
-          </button>
-        </section>
-
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Dashboard
+        </a>
+        <a href="dashboard.html" class="nav-link active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          I miei gruppi
+        </a>
+        <a href="#" class="nav-link" id="nav-btn-nuovo" style="display: none;">
+          <!-- Hidden here, using a FAB or specific button -->
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="#" class="nav-link logout-action">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Esci
+        </a>
       </div>
+    </aside>
 
-      <!-- COLONNA DESTRA (Main Content) -->
-      <div class="main-content" style="display: flex; flex-direction: column; gap: 1.8rem;">
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+      
+      <header class="topbar">
+        <div class="topbar-left">
+          <a href="dashboard.html" class="btn-ghost desktop-only" style="padding: 8px; border-radius: 50%;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          </a>
+          <div style="font-size: 20px; font-weight: 700; color: var(--color-brand-600);" class="mobile-only">Qotly</div>
+        </div>
+        <div class="topbar-right">
+        </div>
+      </header>
+
+      <main class="page-content">
         
-        <!-- SEZIONE: Grafico Spese -->
-        <section class="card m-section m-spese m-active">
-          <h2>Riepilogo per Categoria</h2>
-          <div style="position: relative; width: 100%; max-width: 250px; margin: 0 auto; height: 250px;">
-            <canvas id="expenses-chart"></canvas>
-          </div>
-        </section>
-
-        <!-- SEZIONE: Storico Spese -->
-        <section class="card m-section m-spese m-active" style="flex-grow: 1; display: flex; flex-direction: column;">
-          <h2>Storico Spese</h2>
-          <div id="expenses-list" style="flex-grow: 1; max-height: 800px; overflow-y: auto; padding-right: 0.5rem;">
-            <!-- Popolato via JS con il Template qui sotto -->
-          </div>
-          
-          <!-- Template Strutturale HTML5 -->
-          <template id="expense-item-template">
-            <div class="expense-item">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong style="font-size: 1rem; display: flex; align-items: center; gap: 0.6rem; color: var(--text-main);">
-                  <span class="expense-row-icon">
-                    <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                  </span>
-                  <span class="tpl-desc"></span>
-                </strong>
-                <span class="tpl-amount" style="font-weight: 700; background: rgba(59, 130, 246, 0.08); color: var(--primary-color); padding: 0.25rem 0.6rem; border-radius: 8px; font-size: 0.9rem;"></span>
-              </div>
-              <div style="display: flex; align-items: center; margin-top: 0.8rem; border-top: 1px solid var(--border-color); padding-top: 0.6rem;">
-                <span class="tpl-avatar"></span> 
-                <small style="color: var(--text-muted); font-size: 0.8rem;">Pagato da: <strong style="color: var(--text-main);" class="tpl-payer"></strong></small>
+        <div class="group-header animate-in">
+          <div class="group-title-area">
+            <div class="group-icon" id="group-avatar-letter">G</div>
+            <div>
+              <h1 id="group-title"><div class="skeleton skeleton-text" style="width: 200px; height: 28px;"></div></h1>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="badge badge-info" id="group-invite-code-display" style="cursor: pointer;" title="Clicca per copiare">INVITO: ---</span>
+                <span style="font-size: 13px; color: var(--text-muted);" id="group-members-count"></span>
               </div>
             </div>
-          </template>
-        </section>
-        
-      </div>
+          </div>
+          <div class="group-actions">
+            <button class="btn btn-secondary" id="export-pdf-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span class="desktop-only">Esporta Report</span>
+            </button>
+            <button class="btn btn-primary" id="fab-add-expense">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Aggiungi Spesa
+            </button>
+          </div>
+        </div>
 
+        <div class="group-tabs">
+          <div class="group-tab active" data-target="tab-spese">Spese</div>
+          <div class="group-tab" data-target="tab-rimborsi">Rimborsi</div>
+          <div class="group-tab" data-target="tab-membri">Membri</div>
+          <div class="group-tab" data-target="tab-statistiche">Statistiche</div>
+        </div>
+
+        <!-- TAB: SPESE -->
+        <div id="tab-spese" class="tab-content active animate-in" style="animation-delay: 50ms;">
+          <div class="card">
+            <div class="card-body" style="padding: 0;">
+              <div id="expenses-list" style="padding: 0 20px;">
+                <!-- Skeleton Loader inserito via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: RIMBORSI -->
+        <div id="tab-rimborsi" class="tab-content" style="display: none;">
+          <div style="margin-bottom: 32px;">
+            <h3 style="margin-bottom: 16px;">Rimborsi Suggeriti</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Saldando questi debiti, tutti i conti del gruppo torneranno in pari.</p>
+            <div id="suggested-settlements-list">
+              <!-- Popolato via JS -->
+            </div>
+          </div>
+
+          <div>
+            <h3 style="margin-bottom: 16px;">Storico Rimborsi</h3>
+            <div class="card">
+              <div class="card-body" style="padding: 0;">
+                <div id="past-settlements-list" style="padding: 0 20px;">
+                  <!-- Popolato via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: MEMBRI -->
+        <div id="tab-membri" class="tab-content" style="display: none;">
+          <div class="members-grid" id="members-list">
+            <!-- Popolato via JS -->
+          </div>
+
+          <div id="admin-section" style="display: none; margin-top: 48px;">
+            <div class="card" style="border-color: var(--color-danger-500); background: var(--color-danger-50);">
+              <div class="card-body">
+                <h3 style="color: var(--color-danger-700); margin-bottom: 8px;">Amministrazione</h3>
+                <p style="color: var(--color-danger-700); font-size: 14px; margin-bottom: 16px; opacity: 0.8;">La chiusura del gruppo è irreversibile. Tutte le spese verranno eliminate.</p>
+                <button class="btn btn-danger" id="close-group-btn">Chiudi Gruppo Definitivamente</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: STATISTICHE -->
+        <div id="tab-statistiche" class="tab-content" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
+            <!-- Categorie -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Spese per Categoria</h3>
+              </div>
+              <div class="card-body" style="display: flex; justify-content: center; position: relative; height: 300px;">
+                <canvas id="expenses-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
     </div>
-  </main>
+  </div>
 
-  <!-- Floating Action Button per Aggiunta Spesa -->
-  <button id="fab-add-expense" class="fab" title="Aggiungi Spesa">+</button>
+  <!-- MOBILE BOTTOM NAV (Optional per questa pagina, ma manteniamo coerenza se si vuole) -->
+  <nav class="bottom-nav mobile-only">
+    <div class="bottom-nav-inner">
+      <a href="dashboard.html" class="bnav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+      </a>
+      <a href="dashboard.html" class="bnav-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Gruppi</span>
+      </a>
+      <a href="#" class="bnav-link" id="mobile-add-expense-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Aggiungi</span>
+      </a>
+    </div>
+  </nav>
 
-  <!-- Modale Aggiungi Spesa -->
+  <!-- MODAL: AGGIUNGI SPESA -->
   <div id="expense-modal" class="modal-overlay">
-    <div class="modal-content glass-panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0; font-family: var(--font-heading);">Aggiungi Spesa</h2>
-        <button id="close-modal-btn" class="close-btn">&times;</button>
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; font-size: 20px;">Nuova Spesa</h2>
+        <button id="close-modal-btn" class="btn-ghost" style="padding: 8px; border-radius: 50%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
+
       <form id="add-expense-form">
-        <label for="description">Cosa hai pagato?</label>
-        <input type="text" id="description" required placeholder="Es: Cena in pizzeria">
+        <input type="number" id="amount" class="input amount-large-input" step="0.01" min="0.01" required placeholder="0.00">
         
-        <label for="amount">Importo Totale (€):</label>
-        <input type="number" id="amount" step="0.01" min="0.01" required placeholder="0.00">
-        
-        <label for="category">Categoria:</label>
-        <select id="category" required style="width: 100%; margin-bottom: 1rem; padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-main);">
-          <option value="Generale">🏷️ Generale</option>
-          <option value="Cibo">🍔 Cibo e Bevande</option>
-          <option value="Trasporti">🚗 Trasporti</option>
-          <option value="Alloggio">🏠 Alloggio</option>
-          <option value="Svago">🎟️ Svago e Attività</option>
-          <option value="Spesa">🛒 Spesa (Supermercato)</option>
-        </select>
-        
-        <label for="splitMode" style="margin-top: 0.5rem; display:block;">Modalità di Divisione:</label>
-        <select id="splitMode" style="width: 100%; margin-bottom: 0.5rem; padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-main);">
-          <option value="equal">➗ Divisione in Parti Uguali</option>
-          <option value="custom">✏️ Quote Personalizzate</option>
-        </select>
+        <div class="input-group">
+          <label for="description">Descrizione</label>
+          <input type="text" id="description" class="input" required placeholder="Es. Cena in pizzeria">
+        </div>
 
-        <div id="participants-container" style="margin-top: 1rem;"></div>
+        <div class="input-group">
+          <label>Categoria</label>
+          <div class="pill-grid" id="category-pills">
+            <div class="pill pill-active" data-value="Generale">🏷️ Generale</div>
+            <div class="pill" data-value="Cibo">🍔 Cibo</div>
+            <div class="pill" data-value="Trasporti">🚗 Trasporti</div>
+            <div class="pill" data-value="Alloggio">🏠 Alloggio</div>
+            <div class="pill" data-value="Svago">🎟️ Svago</div>
+            <div class="pill" data-value="Spesa">🛒 Spesa</div>
+          </div>
+          <!-- Hidden select for form submission -->
+          <select id="category" required style="display: none;">
+            <option value="Generale" selected>Generale</option>
+            <option value="Cibo">Cibo</option>
+            <option value="Trasporti">Trasporti</option>
+            <option value="Alloggio">Alloggio</option>
+            <option value="Svago">Svago</option>
+            <option value="Spesa">Spesa</option>
+          </select>
+        </div>
 
-        <button type="submit" style="margin-top: 1.2rem; width: 100%;">Conferma Spesa</button>
+        <div class="input-group">
+          <label>Modalità di Divisione</label>
+          <div class="split-selector">
+            <div class="split-option active" data-mode="equal">➗ Parti Uguali</div>
+            <div class="split-option" data-mode="custom">✏️ Personalizzata</div>
+          </div>
+          <select id="splitMode" style="display: none;">
+            <option value="equal" selected>equal</option>
+            <option value="custom">custom</option>
+          </select>
+        </div>
+
+        <div id="participants-container"></div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px; height: 48px; font-size: 16px;">Conferma Spesa</button>
       </form>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    // UI Helpers per le tabs nel Dettaglio Gruppo
+    document.querySelectorAll('.group-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.group-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        const targetId = tab.getAttribute('data-target');
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.style.display = 'block';
+        }
+      });
+    });
+
+    // UI per le pills (Categoria)
+    document.querySelectorAll('#category-pills .pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#category-pills .pill').forEach(p => p.classList.remove('pill-active'));
+        pill.classList.add('pill-active');
+        document.getElementById('category').value = pill.getAttribute('data-value');
+      });
+    });
+
+    // UI per split mode
+    document.querySelectorAll('.split-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.split-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        document.getElementById('splitMode').value = opt.getAttribute('data-mode');
+        // Trigger manual change event so group.js can re-render participants
+        document.getElementById('splitMode').dispatchEvent(new Event('change'));
+      });
+    });
+
+    // FAB mobile wrapper
+    document.getElementById('mobile-add-expense-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('fab-add-expense')?.click();
+    });
+  </script>
+
+
+  <script type="module" src="../js/ui/toast.js"></script>
+  <script type="module" src="../js/ui/skeleton.js"></script>
   <script src="../js/utils.js"></script>
   <script src="../js/group.js"></script>
 </body>

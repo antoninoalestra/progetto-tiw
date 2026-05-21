@@ -34,6 +34,13 @@
       "cognome": "Ferrari",
       "email": "alessandro@example.com",
       "password": "password123"
+    },
+    {
+      "id": "66651ba7-45f7-406e-81c5-f5fbdf9f60ab",
+      "nome": "Antonino",
+      "cognome": "Alestra",
+      "email": "ninoalestra@gmail.com",
+      "password": "password"
     }
   ],
   "groups": [
