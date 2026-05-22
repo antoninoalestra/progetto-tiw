@@ -67,8 +67,10 @@ export const loginUser = async (req, res) => {
 
     const users = await Database.getAll('users');
 
+    const cleanEmail = email.trim();
+
     // Trova l'utente per email
-    const user = users.find(u => u.email === email);
+    const user = users.find(u => u.email === cleanEmail);
 
     // Verifica le credenziali
     if (!user || user.password !== password) {
