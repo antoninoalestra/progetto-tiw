@@ -20,11 +20,31 @@ const stmtGetBalances = db.prepare(`
     JOIN expense_participants ep ON ep.expense_id = e.id
     WHERE e.group_id = @groupId
     GROUP BY ep.user_id
+  ),
+  rimborsi_out AS (
+    SELECT from_user_id AS user_id, SUM(amount) AS totale_inviato
+    FROM reimbursements
+    WHERE group_id = @groupId
+    GROUP BY from_user_id
+  ),
+  rimborsi_in AS (
+    SELECT to_user_id AS user_id, SUM(amount) AS totale_ricevuto
+    FROM reimbursements
+    WHERE group_id = @groupId
+    GROUP BY to_user_id
   )
-  SELECT u.id, u.name,
-         ROUND(totale_pagato - quota_dovuta, 2) AS saldo
-  FROM pagamenti p
-  JOIN users u ON u.id = p.user_id
+  SELECT gm.user_id AS id, u.name,
+         ROUND(
+           COALESCE(p.totale_pagato, 0) - COALESCE(p.quota_dovuta, 0)
+           + COALESCE(ro.totale_inviato, 0)
+           - COALESCE(ri.totale_ricevuto, 0)
+         , 2) AS saldo
+  FROM group_members gm
+  JOIN users u ON gm.user_id = u.id
+  LEFT JOIN pagamenti p ON p.user_id = gm.user_id
+  LEFT JOIN rimborsi_out ro ON ro.user_id = gm.user_id
+  LEFT JOIN rimborsi_in ri ON ri.user_id = gm.user_id
+  WHERE gm.group_id = @groupId
   ORDER BY saldo DESC
 `);
 

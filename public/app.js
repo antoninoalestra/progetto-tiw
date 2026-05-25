@@ -249,6 +249,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================
+  // DETTAGLIO GRUPPO: Modale Rimborso Reale
+  // ==========================================
+  const reimburseModal = document.getElementById('reimburse-modal');
+  if (reimburseModal) {
+    const btnReimburse = document.getElementById('open-reimburse-modal');
+    const closeReimburse = document.getElementById('close-reimburse-modal');
+    const formReimburse = document.getElementById('new-reimbursement-form');
+
+    if (btnReimburse) btnReimburse.addEventListener('click', (e) => { e.preventDefault(); reimburseModal.classList.add('active'); });
+    if (closeReimburse) closeReimburse.addEventListener('click', () => reimburseModal.classList.remove('active'));
+
+    if (formReimburse) {
+      formReimburse.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const groupId = document.getElementById('r-groupId').value;
+        const toUserId = document.getElementById('r-toUserId').value;
+        const amount = document.getElementById('r-amount').value;
+
+        try {
+          const res = await fetch('/api/reimbursements', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ groupId, toUserId, amount })
+          });
+          const data = await res.json();
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert(data.error || 'Errore durante la registrazione del rimborso.');
+          }
+        } catch (err) {
+          alert('Errore di rete');
+        }
+      });
+    }
+  }
+
+  // ==========================================
   // AZIONI GRUPPO: Copia Invito, Elimina Gruppo
   // ==========================================
   const badge = document.getElementById('invite-badge');

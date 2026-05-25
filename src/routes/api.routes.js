@@ -189,4 +189,35 @@ router.post('/expenses', (req, res) => {
   return res.json({ success: true, expense });
 });
 
+// =============================================
+// RIMBORSI
+// =============================================
+
+// POST /api/reimbursements — Registra un rimborso reale
+router.post('/reimbursements', (req, res) => {
+  const { groupId, toUserId, amount } = req.body;
+  const parsedGroupId = parseInt(groupId, 10);
+  const parsedToUserId = parseInt(toUserId, 10);
+  const parsedAmount = parseFloat(amount);
+
+  if (isNaN(parsedGroupId)) return res.status(400).json({ error: 'Gruppo non valido.' });
+  if (isNaN(parsedToUserId)) return res.status(400).json({ error: 'Destinatario non valido.' });
+  if (isNaN(parsedAmount) || parsedAmount <= 0) return res.status(400).json({ error: 'L\'importo deve essere maggiore di zero.' });
+
+  if (!groupsRepo.isMember(parsedGroupId, req.session.userId)) {
+    return res.status(403).json({ error: 'Non sei membro di questo gruppo.' });
+  }
+
+  // Creazione rimborso (fromUserId è l'utente loggato)
+  import('../repositories/reimbursements.repo.js').then(reimbursementsRepo => {
+    try {
+      const reimbursement = reimbursementsRepo.create(parsedGroupId, req.session.userId, parsedToUserId, parsedAmount);
+      return res.json({ success: true, reimbursement });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Errore durante la registrazione del rimborso.' });
+    }
+  });
+});
+
 export default router;

@@ -8,6 +8,7 @@ import { requireAuth } from '../middleware/auth.js';
 import * as groupsRepo from '../repositories/groups.repo.js';
 import * as expensesRepo from '../repositories/expenses.repo.js';
 import * as balancesRepo from '../repositories/balances.repo.js';
+import * as reimbursementsRepo from '../repositories/reimbursements.repo.js';
 import PDFDocument from 'pdfkit';
 
 const router = Router();
@@ -60,6 +61,7 @@ router.get('/:id', (req, res, next) => {
   const balances = balancesRepo.getBalances(groupId);
   const settlements = balancesRepo.calculateSettlements(balances);
   const categoryStats = expensesRepo.getCategoryStats(groupId);
+  const reimbursements = reimbursementsRepo.listForGroup(groupId);
 
   res.render('groups/detail', {
     title: group.name,
@@ -67,6 +69,7 @@ router.get('/:id', (req, res, next) => {
     expenses,
     balances,
     settlements,
+    reimbursements,
     categoryStats,
     isCreator: group.created_by === req.session.userId,
     creatorId: group.created_by,

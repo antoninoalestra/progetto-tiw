@@ -46,3 +46,15 @@ CREATE INDEX IF NOT EXISTS idx_expenses_group
   ON expenses(group_id);
 CREATE INDEX IF NOT EXISTS idx_members_user
   ON group_members(user_id);
+
+CREATE TABLE IF NOT EXISTS reimbursements (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id     INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  from_user_id INTEGER NOT NULL REFERENCES users(id),
+  to_user_id   INTEGER NOT NULL REFERENCES users(id),
+  amount       REAL    NOT NULL CHECK(amount > 0),
+  created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_reimbursements_group
+  ON reimbursements(group_id);

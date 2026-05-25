@@ -126,9 +126,14 @@
       <section id="tab-saldi" class="tab-content" style="display: none;">
         
         <div class="card" style="margin-bottom: 24px;">
-          <div class="card-header">
-            <h3 style="margin: 0; font-size: 16px;">Chi deve a chi</h3>
-            <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">Istruzioni esatte per saldare i debiti</p>
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="margin: 0; font-size: 16px;">Chi deve a chi</h3>
+              <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">Istruzioni esatte per saldare i debiti</p>
+            </div>
+            <button id="open-reimburse-modal" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 13px;">
+              + Registra Rimborso
+            </button>
           </div>
           <div class="card-body" style="padding: 0;">
             <div style="padding: 0 20px;">
@@ -149,6 +154,34 @@
                 {{/each}}
               {{else}}
                 <div class="empty-state" style="padding: 24px;"><p>Tutti i saldi sono in pari!</p></div>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h3 style="margin: 0; font-size: 16px;">Storico Rimborsi Effettuati</h3>
+            <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">Transazioni registrate nel gruppo</p>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div style="padding: 0 20px;">
+              {{#if reimbursements.length}}
+                {{#each reimbursements}}
+                  <div class="balance-row" style="justify-content: flex-start; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                      <span style="font-weight: 500; font-size: 14px;">{{this.from_user_name}}</span>
+                      <span style="color: var(--text-muted); font-size: 13px;">ha pagato</span>
+                      <span style="font-weight: 500; font-size: 14px;">{{this.to_user_name}}</span>
+                    </div>
+                    <div style="text-align: right;">
+                      <span style="display: block; font-weight: 700; color: var(--color-success-600);">{{formatEuro this.amount}}</span>
+                      <span style="font-size: 11px; color: var(--text-muted);">{{formatDate this.created_at}}</span>
+                    </div>
+                  </div>
+                {{/each}}
+              {{else}}
+                <div class="empty-state" style="padding: 24px;"><p>Nessun rimborso registrato finora.</p></div>
               {{/if}}
             </div>
           </div>
@@ -332,6 +365,43 @@
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px;">Conferma Spesa</button>
+    </form>
+  </div>
+</div>
+
+{{!-- MODALE NUOVO RIMBORSO --}}
+<div id="reimburse-modal" class="modal-overlay">
+  <div class="modal-card" style="max-width: 400px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0; font-size: 20px;">Registra Rimborso</h2>
+      <button id="close-reimburse-modal" class="btn-ghost" style="padding: 8px; border-radius: 50%;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    
+    <form id="new-reimbursement-form">
+      <input type="hidden" id="r-groupId" value="{{group.id}}">
+      
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Stai per registrare un pagamento reale verso un altro membro del gruppo.</p>
+      
+      <div class="input-group">
+        <label for="r-toUserId">A chi stai inviando i soldi?</label>
+        <select id="r-toUserId" class="input" required>
+          <option value="" disabled selected>Seleziona destinatario...</option>
+          {{#each group.members}}
+            {{#if (neq this.id ../currentUser.id)}}
+              <option value="{{this.id}}">{{this.name}}</option>
+            {{/if}}
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="input-group" style="margin-top: 16px;">
+        <label for="r-amount">Importo Rimborsato (€)</label>
+        <input type="number" id="r-amount" class="input amount-large-input" step="0.01" min="0.01" required placeholder="0.00">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px; background-color: var(--color-success-600);">Conferma Rimborso</button>
     </form>
   </div>
 </div>
