@@ -1,0 +1,19 @@
+{{!-- views/partials/header.hbs --}}
+{{!-- Navbar con brand, link di navigazione e stato utente --}}
+<header class="app-header">
+  <nav class="header-nav">
+    <a href="/groups" class="header-brand">Qotly</a>
+    <div class="header-links">
+      {{#if currentUser}}
+        <a href="/groups" class="header-link">Gruppi</a>
+        <span class="header-user">Ciao, {{currentUser.name}}</span>
+        <form action="/logout" method="POST" style="display: inline;">
+          <button type="submit" class="btn btn-ghost header-logout">Esci</button>
+        </form>
+      {{else}}
+        <a href="/login" class="header-link">Accedi</a>
+        <a href="/register" class="header-link">Registrati</a>
+      {{/if}}
+    </div>
+  </nav>
+</header>

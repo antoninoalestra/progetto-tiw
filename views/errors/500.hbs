@@ -1,0 +1,18 @@
+{{!-- views/errors/500.hbs --}}
+{{!-- Pagina di errore 500 stilizzata --}}
+
+<div class="auth-layout" style="justify-content: center; align-items: center;">
+  <div style="text-align: center; padding: 60px 24px; max-width: 480px;">
+    <div style="font-size: 100px; font-weight: 700; color: var(--color-danger-500); line-height: 1; opacity: 0.3;">500</div>
+    <h1 style="margin: 24px 0 12px;">Errore del Server</h1>
+    <p style="margin-bottom: 32px; font-size: 16px;">Si è verificato un errore imprevisto. Riprova più tardi.</p>
+    {{#if detail}}
+      <div class="card" style="text-align: left; margin-bottom: 24px;">
+        <div class="card-body" style="font-family: var(--font-mono); font-size: 13px; color: var(--color-danger-700); background: var(--color-danger-50);">
+          {{detail}}
+        </div>
+      </div>
+    {{/if}}
+    <a href="/groups" class="btn btn-primary" style="padding: 12px 32px;">Torna alla Home</a>
+  </div>
+</div>

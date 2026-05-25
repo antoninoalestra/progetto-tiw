@@ -1,0 +1,111 @@
+{{!-- views/expenses/form.hbs --}}
+{{!-- Form per aggiungere una nuova spesa a un gruppo --}}
+
+{{> header}}
+
+<div class="app-layout">
+  <aside class="sidebar-layout" id="app-sidebar">
+    <div class="sidebar-header">
+      <a href="/groups" class="sidebar-brand">Qotly</a>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/groups" class="nav-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        I miei gruppi
+      </a>
+      <a href="/groups/{{group.id}}" class="nav-link active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        {{group.name}}
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <form action="/logout" method="POST">
+        <button type="submit" class="nav-link logout-action" style="width: 100%; border: none; background: none; cursor: pointer; text-align: left;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Esci
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="/groups/{{group.id}}" class="btn-ghost" style="padding: 8px; border-radius: 50%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <div style="font-size: 20px; font-weight: 700; color: var(--color-brand-600);" class="mobile-only">Qotly</div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div style="max-width: 520px; margin: 0 auto;">
+        <h1 style="margin-bottom: 8px;">Nuova Spesa</h1>
+        <p style="color: var(--text-muted); margin-bottom: 32px;">Gruppo: <strong>{{group.name}}</strong></p>
+
+        <div class="card">
+          <div class="card-body">
+            <form action="/expenses" method="POST">
+              <input type="hidden" name="groupId" value="{{group.id}}">
+
+              {{!-- Importo grande --}}
+              <input type="number" id="amount" name="amount" class="input amount-large-input" step="0.01" min="0.01" required placeholder="0.00">
+
+              {{!-- Descrizione --}}
+              <div class="input-group">
+                <label for="description">Descrizione</label>
+                <input type="text" id="description" name="description" class="input" required placeholder="Es. Cena in pizzeria">
+              </div>
+
+              {{!-- Categoria --}}
+              <div class="input-group">
+                <label>Categoria</label>
+                <div class="pill-grid" id="category-pills">
+                  <div class="pill pill-active" data-value="Generale">🏷️ Generale</div>
+                  <div class="pill" data-value="Cibo">🍔 Cibo</div>
+                  <div class="pill" data-value="Trasporti">🚗 Trasporti</div>
+                  <div class="pill" data-value="Alloggio">🏠 Alloggio</div>
+                  <div class="pill" data-value="Svago">🎟️ Svago</div>
+                  <div class="pill" data-value="Spesa">🛒 Spesa</div>
+                </div>
+                <input type="hidden" id="category" name="category" value="Generale">
+              </div>
+
+              {{!-- Partecipanti --}}
+              <div class="input-group">
+                <label>Partecipanti (tutti selezionati = parti uguali)</label>
+                <div id="participants-container">
+                  {{#each group.members}}
+                    <div class="participant-row">
+                      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none; font-size: 14px; letter-spacing: normal;">
+                        <input type="checkbox" name="participants" value="{{this.id}}" checked style="width: 18px; height: 18px; accent-color: var(--color-brand-500);">
+                        {{this.name}}
+                      </label>
+                    </div>
+                  {{/each}}
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px; height: 48px; font-size: 16px;">Conferma Spesa</button>
+            </form>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px;">
+          <a href="/groups/{{group.id}}" class="btn btn-ghost">← Torna al gruppo</a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  // Logica per le pills categoria
+  document.querySelectorAll('#category-pills .pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#category-pills .pill').forEach(p => p.classList.remove('pill-active'));
+      pill.classList.add('pill-active');
+      document.getElementById('category').value = pill.getAttribute('data-value');
+    });
+  });
+</script>

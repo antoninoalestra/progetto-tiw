@@ -1,0 +1,7 @@
+{{!-- views/partials/flash.hbs --}}
+{{!-- Mostra i messaggi flash (successo, errore, warning) --}}
+{{#if flash}}
+  <div class="flash flash--{{flash.type}}" id="flash-message">
+    {{flash.message}}
+  </div>
+{{/if}}

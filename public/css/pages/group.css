@@ -6,6 +6,7 @@
   gap: 16px;
   margin-bottom: 24px;
 }
+
 @media (min-width: 768px) {
   .group-header {
     flex-direction: row;
@@ -38,8 +39,11 @@
   margin: 0 0 4px 0;
   font-size: 24px;
 }
+
 @media (min-width: 768px) {
-  .group-header h1 { font-size: 28px; }
+  .group-header h1 {
+    font-size: 28px;
+  }
 }
 
 .group-actions {
@@ -56,9 +60,11 @@
   margin-bottom: 24px;
   -webkit-overflow-scrolling: touch;
 }
+
 .group-tabs::-webkit-scrollbar {
   display: none;
 }
+
 .group-tab {
   padding: 12px 4px;
   color: var(--text-secondary);
@@ -68,8 +74,15 @@
   position: relative;
   transition: color var(--transition-fast);
 }
-.group-tab:hover { color: var(--text-primary); }
-.group-tab.active { color: var(--color-brand-500); }
+
+.group-tab:hover {
+  color: var(--text-primary);
+}
+
+.group-tab.active {
+  color: var(--color-brand-500);
+}
+
 .group-tab.active::after {
   content: '';
   position: absolute;
@@ -89,6 +102,7 @@
   padding: 16px 0;
   border-bottom: var(--border-default);
 }
+
 .expense-item:last-child {
   border-bottom: none;
 }
@@ -155,6 +169,7 @@
   font-weight: 600;
   margin-bottom: 2px;
 }
+
 .member-info p {
   font-size: 12px;
   color: var(--text-muted);
@@ -195,6 +210,7 @@
     align-items: stretch;
     gap: 16px;
   }
+
   .settlement-action {
     margin-left: 0;
     text-align: right;
@@ -214,6 +230,7 @@
   box-shadow: none !important;
   margin-bottom: 24px;
 }
+
 .amount-large-input:focus {
   border-bottom-color: var(--color-brand-500) !important;
 }
@@ -228,6 +245,7 @@
   border-radius: var(--radius-md);
   margin-bottom: 16px;
 }
+
 .split-option {
   padding: 8px;
   text-align: center;
@@ -238,6 +256,7 @@
   color: var(--text-secondary);
   transition: var(--transition-fast);
 }
+
 .split-option.active {
   background: var(--bg-card);
   color: var(--text-primary);
@@ -251,6 +270,7 @@
   padding: 8px 0;
   border-bottom: 1px solid var(--border-color);
 }
+
 .participant-row:last-child {
   border-bottom: none;
 }

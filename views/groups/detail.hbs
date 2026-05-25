@@ -1,0 +1,340 @@
+{{!-- views/groups/detail.hbs --}}
+{{!-- Dettaglio Gruppo: spese, saldi, membri, stats, modale inline per spesa --}}
+
+<div class="app-layout">
+  {{!-- SIDEBAR DESKTOP --}}
+  <aside class="sidebar-layout" id="app-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">Qotly</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/groups" class="nav-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        Dashboard
+      </a>
+      <a href="/groups" class="nav-link active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        I miei gruppi
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <form action="/logout" method="POST">
+        <button type="submit" class="nav-link logout-action" style="width: 100%; border: none; background: none; cursor: pointer; text-align: left; color: rgba(255,255,255,0.7);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Esci
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  {{!-- MAIN CONTENT --}}
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="/groups" class="btn-ghost" style="padding: 8px; border-radius: 50%;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <div style="font-size: 20px; font-weight: 700; color: var(--color-brand-600);" class="mobile-only">Qotly</div>
+      </div>
+      <div class="topbar-right">
+      </div>
+    </header>
+
+    <main class="page-content">
+      {{!-- Dati per JS --}}
+      <script id="group-data" type="application/json">{{{groupJson}}}</script>
+      <script id="members-data" type="application/json">{{{membersJson}}}</script>
+      <script id="stats-data" type="application/json">{{{categoryStatsJson}}}</script>
+
+      <div class="group-header animate-in">
+        <div class="group-title-area">
+          <div class="group-icon">{{initial group.name}}</div>
+          <div>
+            <h1 style="margin-bottom: 4px;">{{group.name}}</h1>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <span class="badge badge-info" id="invite-badge" style="cursor: pointer;" title="Copia">
+                INVITO: <strong style="font-family: var(--font-mono); letter-spacing: 1px;">{{group.invite_code}}</strong>
+              </span>
+              <span style="font-size: 13px; color: var(--text-muted);">
+                {{group.members.length}} membr{{#if (eq group.members.length 1)}}o{{else}}i{{/if}}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="group-actions" style="display: flex; gap: 12px;">
+          <a href="/groups/{{group.id}}/report" class="btn btn-secondary" target="_blank" title="Esporta Report PDF">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span class="desktop-only">Scarica PDF</span>
+          </a>
+          <button id="open-expense-modal" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Aggiungi Spesa</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab-item tab-active" data-target="tab-spese">Spese</div>
+        <div class="tab-item" data-target="tab-saldi">Rimborsi</div>
+        <div class="tab-item" data-target="tab-membri">Membri</div>
+        <div class="tab-item" data-target="tab-stats">Statistiche</div>
+      </div>
+
+      {{!-- TAB SPESE --}}
+      <section id="tab-spese" class="tab-content" style="display: block;">
+        <div class="card">
+          <div class="card-body" style="padding: 0;">
+            <div class="feed-list" id="expenses-container" style="padding: 0 20px;">
+              {{#if expenses.length}}
+                {{#each expenses}}
+                  <div class="expense-item">
+                    <div class="expense-icon">
+                      {{#if (eq this.category "Cibo")}}🍔
+                      {{else if (eq this.category "Trasporti")}}🚗
+                      {{else if (eq this.category "Alloggio")}}🏠
+                      {{else if (eq this.category "Svago")}}🎟️
+                      {{else if (eq this.category "Spesa")}}🛒
+                      {{else}}🏷️
+                      {{/if}}
+                    </div>
+                    <div class="expense-content">
+                      <div class="expense-title">{{this.description}}</div>
+                      <div class="expense-meta">
+                        <span>Pagato da {{this.payer_name}}</span>
+                        <span>•</span>
+                        <span>{{formatDate this.created_at}}</span>
+                      </div>
+                    </div>
+                    <div class="expense-amount-area">
+                      <div class="expense-amount">{{formatEuro this.amount}}</div>
+                      <div style="font-size: 12px; color: var(--text-muted); text-align: right;">{{this.category}}</div>
+                    </div>
+                  </div>
+                {{/each}}
+              {{else}}
+                <div class="empty-state" style="padding: 60px 24px;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                  <p>Nessuna spesa registrata.</p>
+                </div>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {{!-- TAB SALDI E RIMBORSI --}}
+      <section id="tab-saldi" class="tab-content" style="display: none;">
+        
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h3 style="margin: 0; font-size: 16px;">Chi deve a chi</h3>
+            <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">Istruzioni esatte per saldare i debiti</p>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div style="padding: 0 20px;">
+              {{#if settlements.length}}
+                {{#each settlements}}
+                  <div class="balance-row" style="justify-content: flex-start; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <div class="avatar avatar-sm" style="background: var(--color-danger-100); color: var(--color-danger-700); font-size: 12px; width: 24px; height: 24px;">{{initial this.from}}</div>
+                      <span style="font-weight: 500;">{{this.from}}</span>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <div class="avatar avatar-sm" style="background: var(--color-success-100); color: var(--color-success-700); font-size: 12px; width: 24px; height: 24px;">{{initial this.to}}</div>
+                      <span style="font-weight: 500;">{{this.to}}</span>
+                    </div>
+                    <span style="margin-left: auto; font-weight: 700; color: var(--text-main);">{{formatEuro this.amount}}</span>
+                  </div>
+                {{/each}}
+              {{else}}
+                <div class="empty-state" style="padding: 24px;"><p>Tutti i saldi sono in pari!</p></div>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 style="margin: 0; font-size: 16px;">Situazione Contabile (Netta)</h3>
+            <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">Aggiornamento live</p>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div id="balances-container" data-group-id="{{group.id}}" style="padding: 0 20px;">
+              {{#each balances}}
+                <div class="balance-row">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="avatar avatar-sm" style="background: var(--color-brand-100); color: var(--color-brand-700);">{{initial this.name}}</div>
+                    <span class="member-name">{{this.name}}</span>
+                  </div>
+                  <span class="balance {{balanceClass this.saldo}}">{{formatSaldo this.saldo}}</span>
+                </div>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {{!-- TAB MEMBRI E IMPOSTAZIONI --}}
+      <section id="tab-membri" class="tab-content" style="display: none;">
+        <div class="members-grid">
+          {{#each group.members}}
+            <div class="member-card">
+              <div style="display: flex; gap: 16px; align-items: center;">
+                <span class="avatar avatar-md" style="background: var(--color-brand-400);">{{initial this.name}}</span>
+                <div class="member-info">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <h4 style="margin: 0;">{{this.name}}</h4>
+                    {{#if (eq this.id ../currentUser.id)}}
+                      <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">(Tu)</span>
+                    {{/if}}
+                    {{#if (eq this.id ../creatorId)}}
+                      <span class="badge" style="background: var(--color-brand-600); color: white; padding: 2px 6px; font-size: 10px; border-radius: 4px;">👑 Admin</span>
+                    {{/if}}
+                  </div>
+                  <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 13px;">{{this.email}}</p>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+
+        {{#if isCreator}}
+          <div class="card" style="margin-top: 32px; border: 1px solid var(--color-danger-200);">
+            <div class="card-body">
+              <h3 style="color: var(--color-danger-700); margin: 0 0 8px 0;">Zona Pericolosa</h3>
+              <p style="margin: 0 0 16px 0; font-size: 14px;">Eliminare questo gruppo rimuoverà definitivamente tutte le spese, i saldi e lo storico. L'azione non può essere annullata.</p>
+              <button id="delete-group-btn" class="btn" style="background-color: #e11d48; color: white; border: none; padding: 10px 20px; font-weight: 600; border-radius: 6px; cursor: pointer; margin-top: 12px; display: inline-block;">
+                Chiudi ed Elimina Gruppo
+              </button>
+            </div>
+          </div>
+        {{/if}}
+      </section>
+
+      {{!-- TAB STATISTICHE --}}
+      <section id="tab-stats" class="tab-content" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="margin: 0; font-size: 16px;">Spese per Categoria</h3>
+          </div>
+          <div class="card-body" style="display: flex; justify-content: center; align-items: center; min-height: 300px; padding: 24px;">
+            {{#if categoryStats.length}}
+              <div style="position: relative; height: 300px; width: 100%; max-width: 400px;">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            {{else}}
+              <div class="empty-state">
+                <p>Nessun dato sufficiente per le statistiche.</p>
+              </div>
+            {{/if}}
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+{{!-- BOTTOM NAV MOBILE --}}
+<nav class="bottom-nav mobile-only">
+  <div class="bottom-nav-inner">
+    <a href="/groups" class="bnav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Home</span>
+    </a>
+    <a href="/groups" class="bnav-link active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+      <span>Gruppi</span>
+    </a>
+    <a href="#" class="bnav-link" id="mobile-expense-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      <span>Spesa</span>
+    </a>
+  </div>
+</nav>
+
+{{!-- MODALE NUOVA SPESA --}}
+<div id="expense-modal" class="modal-overlay">
+  <div class="modal-card" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0; font-size: 20px;">Aggiungi Spesa</h2>
+      <button id="close-expense-modal" class="btn-ghost" style="padding: 8px; border-radius: 50%;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <form id="new-expense-form">
+      <input type="hidden" id="groupId" value="{{group.id}}">
+
+      <input type="number" id="amount" class="input amount-large-input" step="0.01" min="0.01" required placeholder="0.00">
+
+      <div class="input-group">
+        <label for="description">Descrizione</label>
+        <input type="text" id="description" class="input" required placeholder="Es. Cena">
+      </div>
+
+      <div class="input-group">
+        <label>Categoria</label>
+        <div class="pill-grid" id="category-pills">
+          <div class="pill pill-active" data-value="Generale">🏷️ Generale</div>
+          <div class="pill" data-value="Cibo">🍔 Cibo</div>
+          <div class="pill" data-value="Trasporti">🚗 Trasporti</div>
+          <div class="pill" data-value="Alloggio">🏠 Alloggio</div>
+          <div class="pill" data-value="Svago">🎟️ Svago</div>
+          <div class="pill" data-value="Spesa">🛒 Spesa</div>
+        </div>
+        <input type="hidden" id="category" value="Generale">
+      </div>
+
+      <div class="input-group" style="margin-top: 24px;">
+        <label style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Divisione Spesa</span>
+        </label>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button type="button" class="btn btn-secondary active-split" id="btn-split-equal" style="flex: 1;">Parti Uguali</button>
+          <button type="button" class="btn btn-secondary" id="btn-split-custom" style="flex: 1;">Personalizzata</button>
+        </div>
+
+        <div id="split-equal-container">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Seleziona chi partecipa alla spesa.</p>
+          <div class="participants-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 8px;">
+            {{#each group.members}}
+              <label style="display: flex; align-items: center; gap: 12px; padding: 8px; cursor: pointer;">
+                <input type="checkbox" class="participant-cb" value="{{this.id}}" checked style="width: 18px; height: 18px; accent-color: var(--color-brand-500);">
+                <div class="avatar avatar-sm" style="background: var(--color-neutral-200);">{{initial this.name}}</div>
+                <span>{{this.name}}</span>
+              </label>
+            {{/each}}
+          </div>
+        </div>
+
+        <div id="split-custom-container" style="display: none;">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Inserisci l'importo esatto per ogni persona.</p>
+          <div class="participants-list" style="max-height: 200px; overflow-y: auto;">
+            {{#each group.members}}
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="avatar avatar-sm" style="background: var(--color-neutral-200);">{{initial this.name}}</div>
+                  <span style="font-size: 14px;">{{this.name}}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <span style="color: var(--text-muted);">€</span>
+                  <input type="number" class="input custom-share-input" data-user-id="{{this.id}}" step="0.01" min="0" placeholder="0.00" style="width: 80px; text-align: right; padding: 4px 8px;">
+                </div>
+              </div>
+            {{/each}}
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-default);">
+            <span style="font-size: 13px; font-weight: 500;">Totale assegnato:</span>
+            <span id="custom-split-total" style="font-weight: 700;">€0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px;">Conferma Spesa</button>
+    </form>
+  </div>
+</div>
+
+<!-- Chart.js dal CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

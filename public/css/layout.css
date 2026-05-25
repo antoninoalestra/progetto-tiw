@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   padding: 0 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-brand {
@@ -52,21 +52,22 @@
   gap: 12px;
   padding: 12px 16px;
   border-radius: var(--radius-md);
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
   transition: var(--transition-fast);
 }
 
 .nav-link:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   color: white;
 }
 
 .nav-link.active {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
   position: relative;
 }
+
 .nav-link.active::before {
   content: '';
   position: absolute;
@@ -80,7 +81,7 @@
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* MAIN CONTENT */
@@ -94,13 +95,13 @@
 
 /* TOPBAR */
 .topbar {
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-top, 0px));
   background: var(--bg-card);
   border-bottom: var(--border-default);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: env(safe-area-inset-top, 0px) 32px 0 32px;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -134,6 +135,7 @@
   color: var(--text-secondary);
   transition: var(--transition-fast);
 }
+
 .theme-toggle-btn:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
@@ -155,11 +157,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
   background: var(--bg-card);
   border-top: var(--border-default);
   z-index: 50;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .bottom-nav-inner {
@@ -188,6 +190,7 @@
   width: 20px;
   height: 20px;
 }
+
 .bnav-link span {
   font-size: 10px;
   font-weight: 500;
@@ -198,23 +201,29 @@
   .sidebar-layout {
     transform: translateX(-100%);
   }
+
   .sidebar-layout.open {
     transform: translateX(0);
   }
+
   .main-wrapper {
     margin-left: 0;
-    padding-bottom: 64px; /* for bottom nav */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    /* space for bottom nav */
   }
+
   .topbar {
-    padding: 0 16px;
+    padding: env(safe-area-inset-top, 0px) 16px 0 16px;
   }
+
   .page-content {
     padding: 16px;
   }
+
   .bottom-nav {
     display: block;
   }
-  
+
   .hamburger {
     display: block !important;
   }

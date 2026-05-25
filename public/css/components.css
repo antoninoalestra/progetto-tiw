@@ -290,6 +290,7 @@
     max-width: 100%;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     transform: translateY(100%);
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   }
 }
 
