@@ -64,6 +64,12 @@ const stmtGetTotalExpensesForUser = db.prepare(`
   JOIN group_members gm ON gm.group_id = e.group_id AND gm.user_id = @userId
 `);
 
+// Cancella partecipanti di una spesa
+const stmtDeleteParticipants = db.prepare('DELETE FROM expense_participants WHERE expense_id = @id');
+
+// Cancella una spesa
+const stmtDeleteExpense = db.prepare('DELETE FROM expenses WHERE id = @id');
+
 // --- Funzioni esportate ---
 
 /**
@@ -132,4 +138,13 @@ export const create = db.transaction((groupId, paidBy, description, amount, cate
   }
 
   return findById(expenseId);
+});
+
+/**
+ * Elimina una spesa e le sue associazioni.
+ * @param {number} id - ID della spesa da eliminare
+ */
+export const deleteById = db.transaction((id) => {
+  stmtDeleteParticipants.run({ id });
+  return stmtDeleteExpense.run({ id });
 });

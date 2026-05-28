@@ -54,7 +54,7 @@ Segui questi passaggi per scaricare, configurare ed eseguire l'applicazione sul 
 
 ### 1. Prerequisiti
 Assicurati di avere installato sul tuo sistema:
-* [Node.js](https://nodejs.org/) (Versione 18.x o superiore raccomandata)
+* [Node.js](https://nodejs.org/) (Richiede esplicitamente versione **>= 20**)
 * **npm** (Il package manager, fornito insieme a Node.js)
 
 ### 2. Installazione

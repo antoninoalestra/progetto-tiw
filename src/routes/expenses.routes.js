@@ -98,4 +98,31 @@ router.post('/', (req, res) => {
   return res.redirect(`/groups/${parsedGroupId}`);
 });
 
+// POST /expenses/:id/delete — Elimina una spesa
+router.post('/:id/delete', (req, res) => {
+  const expenseId = parseInt(req.params.id, 10);
+  
+  if (isNaN(expenseId)) {
+    req.session.flash = { type: 'error', message: 'ID spesa non valido.' };
+    return res.redirect('/groups');
+  }
+
+  const expense = expensesRepo.findById(expenseId);
+  if (!expense) {
+    req.session.flash = { type: 'error', message: 'Spesa non trovata.' };
+    return res.redirect('/groups');
+  }
+
+  // Controllo autorizzazione: l'utente deve essere membro del gruppo della spesa
+  if (!groupsRepo.isMember(expense.group_id, req.session.userId)) {
+    req.session.flash = { type: 'error', message: 'Non sei autorizzato a eliminare questa spesa.' };
+    return res.redirect('/groups');
+  }
+
+  expensesRepo.deleteById(expenseId);
+
+  req.session.flash = { type: 'success', message: 'Spesa eliminata con successo!' };
+  return res.redirect(`/groups/${expense.group_id}`);
+});
+
 export default router;
