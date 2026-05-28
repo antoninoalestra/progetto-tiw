@@ -1,4 +1,8 @@
-import sys
+ï»¿import sys
+import io
+
+sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 msg = sys.stdin.read().strip()
 mapping = {
@@ -10,10 +14,10 @@ mapping = {
     'Revisione README': 'docs: revise README documentation',
     'rimozione residui websocket': 'refactor: clean up residual websocket logic',
     'rimozione websocket': 'refactor: remove websocket functionality',
-    'implementzione divione spesa personalizzata e miglioramento grafica frontend': 'feat: implement custom expense split and improve frontend UI',
-    'aggiunta gruppi con grafici di spesa, e miglioramento README.md': 'feat: add groups with expense charts and improve README',
-    'miglioramento grafica, e correzione funzionalità export pdf': 'feat: improve UI and fix PDF export functionality',
-    'miglioramento generale sia frontend che backend, manca da finirela parte di frontend da mobile': 'feat: improve frontend and backend general stability'
+    'implementzione divione spesa personalizzata': 'feat: implement custom expense split and improve frontend UI',
+    'aggiunta gruppi con grafici di spesa': 'feat: add groups with expense charts and improve README',
+    'miglioramento grafica': 'feat: improve UI and fix PDF export functionality',
+    'miglioramento generale sia frontend che backend': 'feat: improve frontend and backend general stability'
 }
 
 for old, new_msg in mapping.items():
