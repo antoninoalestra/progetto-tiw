@@ -10,7 +10,7 @@ Progetto realizzato per il corso universitario di Tecnologie Internet e Web (TIW
 
 ---
 
-## ✨ Funzionalità Principali
+## Funzionalità Principali
 
 * **Gestione Gruppi:** Creazione e partecipazione a infiniti gruppi tramite codici di invito sicuri alfanumerici a 6 caratteri.
 * **Tracking Spese:** Inserimento dettagliato di spese con importi, categorie e descrizioni.
@@ -38,7 +38,7 @@ Come da specifiche, l'applicazione **non utilizza** framework CSS (come Bootstra
 
 ---
 
-## 🏗️ Architettura
+## Architettura
 
 L'organizzazione del codice segue il pattern **MVC**:
 - `src/repositories/`: **(Models)** Interazione col database SQLite, prepared statements per performance ed esecuzione query sicure.
@@ -48,7 +48,7 @@ L'organizzazione del codice segue il pattern **MVC**:
 
 ---
 
-## 🚀 Guida all'Avvio Rapido
+## Guida all'Avvio Rapido
 
 Segui questi passaggi per scaricare, configurare ed eseguire l'applicazione sul tuo computer.
 
@@ -96,8 +96,8 @@ Se hai eseguito il comando `seed` al punto 3, puoi accedere con le credenziali d
 
 ---
 
-## 💡 Note aggiuntive per lo studio e la valutazione
+## Note aggiuntive per lo studio e la valutazione
 Tutto il codice complesso (metodi backend, controller, configurazione del database) è commentato in lingua italiana per favorire la chiarezza e la leggibilità didattica.
 Il design punta all'effetto "WOW", con micro-interazioni sui pulsanti, finestre modali fluide dal basso, ombreggiatura dinamica e messaggi toast che fluttuano sullo schermo senza scompaginare il layout.
 
-Buono studio e buona divisione delle spese! 🎉
+Buono studio e buona divisione delle spese!
