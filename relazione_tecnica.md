@@ -31,6 +31,7 @@ La sicurezza è stata posta al centro dello sviluppo:
 - **Sessioni Sicure (`express-session`)**: L'autenticazione è gestita tramite cookie di sessione.
   - Il flag `httpOnly: true` previene gli attacchi XSS (Cross-Site Scripting), impedendo a script JavaScript client-side (es. document.cookie) di accedere al token di sessione.
   - Il flag `sameSite: 'lax'` (o `strict`) mitiga le vulnerabilità di CSRF (Cross-Site Request Forgery) in combinazione con l'uso esclusivo del pattern PRG (Post-Redirect-Get) per qualsiasi mutazione di stato.
+  - **Trade-off consapevole sul `SESSION_SECRET`**: Nel file `server.js` è stato impostato un fallback hardcoded (`process.env.SESSION_SECRET || 'qotly-dev-secret'`). Pur non essendo una best-practice per la produzione, è una scelta consapevole per semplificare l'avvio immediato in ambiente di sviluppo (esame) senza obbligare la configurazione manuale di file `.env`, garantendo comunque la predisposizione per ambienti produttivi.
 
 ---
 

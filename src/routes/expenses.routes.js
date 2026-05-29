@@ -113,10 +113,10 @@ router.post('/:id/delete', (req, res) => {
     return res.redirect('/groups');
   }
 
-  // Controllo autorizzazione: l'utente deve essere membro del gruppo della spesa
-  if (!groupsRepo.isMember(expense.group_id, req.session.userId)) {
-    req.session.flash = { type: 'error', message: 'Non sei autorizzato a eliminare questa spesa.' };
-    return res.redirect('/groups');
+  // Controllo autorizzazione: l'utente deve essere il creatore della spesa
+  if (expense.paid_by !== req.session.userId) {
+    req.session.flash = { type: 'error', message: 'Non sei autorizzato a eliminare questa spesa. Solo chi l\'ha creata può farlo.' };
+    return res.redirect(`/groups/${expense.group_id}`);
   }
 
   expensesRepo.deleteById(expenseId);
