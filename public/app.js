@@ -306,18 +306,21 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteBtn.addEventListener('click', async () => {
       if (!confirm('Sei sicuro di voler eliminare il gruppo? TUTTI i dati andranno persi.')) return;
       
-      const groupId = document.getElementById('groupId') ? document.getElementById('groupId').value : null;
+      let groupId = document.getElementById('groupId') ? document.getElementById('groupId').value : null;
       if (!groupId) {
         // Fallback per ricavare l'ID dall'URL se non c'è input hidden
         const path = window.location.pathname.split('/');
-        const id = path[path.length-1];
-        if(!id) return;
-        try {
-          const res = await fetch(`/api/groups/${id}/delete`, { method: 'POST' });
-          const data = await res.json();
-          if (data.success) window.location.href = '/groups';
-          else alert(data.error);
-        } catch(e) {}
+        groupId = path[path.length-1];
+      }
+      if (!groupId) return;
+
+      try {
+        const res = await fetch(`/api/groups/${groupId}/delete`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) window.location.href = '/groups';
+        else alert(data.error);
+      } catch(e) {
+        alert('Errore di rete');
       }
     });
   }

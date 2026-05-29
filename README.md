@@ -21,7 +21,7 @@ Progetto realizzato per il corso universitario di Tecnologie Internet e Web (TIW
 
 ---
 
-## 💻 Stack Tecnologico
+## Stack Tecnologico
 
 Il progetto fa uso di moderne tecnologie web, rispettando i vincoli accademici (nessun framework frontend pesante o database esterno cloud).
 
