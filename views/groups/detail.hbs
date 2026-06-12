@@ -2,7 +2,7 @@
 {{!-- Dettaglio Gruppo: spese, saldi, membri, stats, modale inline per spesa --}}
 
 <div class="app-layout">
-  {{!-- SIDEBAR DESKTOP --}}
+  {{!-- BARRA LATERALE DESKTOP --}}
   <aside class="sidebar-layout" id="app-sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">Qotly</div>
@@ -27,7 +27,7 @@
     </div>
   </aside>
 
-  {{!-- MAIN CONTENT --}}
+  {{!-- CONTENUTO PRINCIPALE --}}
   <div class="main-wrapper">
     <header class="topbar">
       <div class="topbar-left">
@@ -41,7 +41,7 @@
     </header>
 
     <main class="page-content">
-      {{!-- Dati per JS --}}
+      {{!-- Dati per JavaScript --}}
       <script id="group-data" type="application/json">{{{groupJson}}}</script>
       <script id="members-data" type="application/json">{{{membersJson}}}</script>
       <script id="stats-data" type="application/json">{{{categoryStatsJson}}}</script>
@@ -80,7 +80,7 @@
         <div class="tab-item" data-target="tab-stats">Statistiche</div>
       </div>
 
-      {{!-- TAB SPESE --}}
+      {{!-- SCHEDA SPESE --}}
       <section id="tab-spese" class="tab-content" style="display: block;">
         <div class="card">
           <div class="card-body" style="padding: 0;">
@@ -129,7 +129,7 @@
         </div>
       </section>
 
-      {{!-- TAB SALDI E RIMBORSI --}}
+      {{!-- SCHEDA SALDI E RIMBORSI --}}
       <section id="tab-saldi" class="tab-content" style="display: none;">
         
         <div class="card" style="margin-bottom: 24px;">
@@ -215,7 +215,7 @@
         </div>
       </section>
 
-      {{!-- TAB MEMBRI E IMPOSTAZIONI --}}
+      {{!-- SCHEDA MEMBRI E IMPOSTAZIONI --}}
       <section id="tab-membri" class="tab-content" style="display: none;">
         <div class="members-grid">
           {{#each group.members}}
@@ -252,7 +252,7 @@
         {{/if}}
       </section>
 
-      {{!-- TAB STATISTICHE --}}
+      {{!-- SCHEDA STATISTICHE --}}
       <section id="tab-stats" class="tab-content" style="display: none;">
         <div class="card">
           <div class="card-header">
@@ -275,7 +275,7 @@
   </div>
 </div>
 
-{{!-- BOTTOM NAV MOBILE --}}
+{{!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE --}}
 <nav class="bottom-nav mobile-only">
   <div class="bottom-nav-inner">
     <a href="/groups" class="bnav-link">
@@ -293,7 +293,7 @@
   </div>
 </nav>
 
-{{!-- MODALE NUOVA SPESA --}}
+{{!-- FINESTRA MODALE NUOVA SPESA --}}
 <div id="expense-modal" class="modal-overlay">
   <div class="modal-card" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -376,7 +376,7 @@
   </div>
 </div>
 
-{{!-- MODALE NUOVO RIMBORSO --}}
+{{!-- FINESTRA MODALE NUOVO RIMBORSO --}}
 <div id="reimburse-modal" class="modal-overlay">
   <div class="modal-card" style="max-width: 400px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -413,5 +413,5 @@
   </div>
 </div>
 
-<!-- Chart.js dal CDN -->
+<!-- Libreria Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

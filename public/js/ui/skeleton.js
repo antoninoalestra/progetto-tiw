@@ -1,5 +1,4 @@
-// public/js/ui/skeleton.js
-
+// Componenti finti per indicare il caricamento in corso (scheletri)
 export function createListSkeleton(count = 3) {
   let html = '';
   for (let i = 0; i < count; i++) {

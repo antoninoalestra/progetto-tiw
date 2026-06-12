@@ -1,6 +1,5 @@
-// src/routes/api.routes.js
-// Endpoint JSON per le chiamate AJAX dal frontend.
-// Gestisce: saldi live, stats, creazione gruppi/spese, join, delete gruppo.
+// Endpoint richiamati dal frontend via AJAX
+// Tutte queste rotte richiedono un utente loggato
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
@@ -15,7 +14,7 @@ router.use(requireAuth);
 // GRUPPI
 // =============================================
 
-// POST /api/groups — Crea un nuovo gruppo (chiamato dalla modale)
+// Crea un nuovo gruppo
 router.post('/groups', (req, res) => {
   const { name, description } = req.body;
 
@@ -29,7 +28,7 @@ router.post('/groups', (req, res) => {
   return res.json({ success: true, group });
 });
 
-// POST /api/groups/join — Unisciti a un gruppo (chiamato dalla modale)
+// Iscrizione a un gruppo tramite codice invito
 router.post('/groups/join', (req, res) => {
   const { inviteCode } = req.body;
 
@@ -50,7 +49,7 @@ router.post('/groups/join', (req, res) => {
   return res.json({ success: true, group });
 });
 
-// POST /api/groups/:id/delete — Elimina un gruppo (solo admin/creatore)
+// Elimina un gruppo (solo chi lo ha creato può farlo)
 router.post('/groups/:id/delete', (req, res) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return res.status(400).json({ error: 'ID gruppo non valido' });
@@ -58,17 +57,17 @@ router.post('/groups/:id/delete', (req, res) => {
   const group = groupsRepo.findById(groupId);
   if (!group) return res.status(404).json({ error: 'Gruppo non trovato' });
 
-  // Solo il creatore (admin) può eliminare il gruppo
+  // Controllo permessi
   if (group.created_by !== req.session.userId) {
     return res.status(403).json({ error: 'Solo l\'amministratore può eliminare il gruppo.' });
   }
 
-  // CASCADE si occupa di eliminare group_members, expenses, expense_participants
+  // Il database si occupa di ripulire le spese collegate tramite i vincoli a cascata
   groupsRepo.deleteGroup(groupId);
   return res.json({ success: true });
 });
 
-// GET /api/groups/:id/members — Lista membri (usata dal form spesa via AJAX)
+// Ritorna la lista dei membri di un gruppo (serve alla form delle spese)
 router.get('/groups/:id/members', (req, res) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return res.status(400).json({ error: 'ID non valido' });
@@ -87,7 +86,7 @@ router.get('/groups/:id/members', (req, res) => {
 // SALDI
 // =============================================
 
-// GET /api/groups/:id/balances — Saldi del gruppo (polling AJAX ogni 15s)
+// Restituisce i saldi ricalcolati per aggiornare l'interfaccia
 router.get('/groups/:id/balances', (req, res) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return res.status(400).json({ error: 'ID non valido' });
@@ -104,7 +103,7 @@ router.get('/groups/:id/balances', (req, res) => {
 // STATISTICHE
 // =============================================
 
-// GET /api/groups/:id/stats — Spese aggregate per categoria (per Chart.js)
+// Dati per i grafici a torta delle spese
 router.get('/groups/:id/stats', (req, res) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return res.status(400).json({ error: 'ID non valido' });
@@ -121,13 +120,13 @@ router.get('/groups/:id/stats', (req, res) => {
 // SPESE
 // =============================================
 
-// POST /api/expenses — Crea una nuova spesa (chiamato dalla modale)
+// Registra una nuova spesa
 router.post('/expenses', (req, res) => {
   const { groupId, description, amount, category, participants, splitMode, shares } = req.body;
   const parsedGroupId = parseInt(groupId, 10);
   const parsedAmount = parseFloat(amount);
 
-  // Validazione
+  // Validazione dei dati ricevuti
   if (isNaN(parsedGroupId)) {
     return res.status(400).json({ error: 'Gruppo non valido.' });
   }
@@ -141,7 +140,7 @@ router.post('/expenses', (req, res) => {
     return res.status(403).json({ error: 'Non sei membro di questo gruppo.' });
   }
 
-  // Gestione partecipanti
+  // Determina chi ha partecipato alla spesa (tutti o solo alcuni scelti)
   let participantIds;
   if (participants && participants.length > 0) {
     participantIds = participants.map(Number);
@@ -154,7 +153,7 @@ router.post('/expenses', (req, res) => {
     return res.status(400).json({ error: 'Devi selezionare almeno un partecipante.' });
   }
 
-  // Gestione split personalizzato
+  // Se lo split non è in parti uguali, calcola le quote esatte fornite dall'utente
   let parsedShares = null;
   if (splitMode === 'custom' && shares) {
     parsedShares = {};
@@ -167,7 +166,7 @@ router.post('/expenses', (req, res) => {
       parsedShares[Number(userId)] = val;
       sharesTotal += val;
     }
-    // Verifica che la somma degli importi personalizzati corrisponda al totale
+    // Controlla che le quote personalizzate sommino esattamente al totale della spesa
     if (Math.abs(sharesTotal - parsedAmount) > 0.01) {
       return res.status(400).json({
         error: `La somma delle quote (€${sharesTotal.toFixed(2)}) non corrisponde all'importo totale (€${parsedAmount.toFixed(2)}).`
@@ -175,7 +174,7 @@ router.post('/expenses', (req, res) => {
     }
   }
 
-  // Crea la spesa in modo atomico
+  // Salva tutto in una singola transazione nel database
   const expense = expensesRepo.create(
     parsedGroupId,
     req.session.userId,
@@ -193,7 +192,7 @@ router.post('/expenses', (req, res) => {
 // RIMBORSI
 // =============================================
 
-// POST /api/reimbursements — Registra un rimborso reale
+// Registra che un utente ha rimborsato un altro
 router.post('/reimbursements', (req, res) => {
   const { groupId, toUserId, amount } = req.body;
   const parsedGroupId = parseInt(groupId, 10);
@@ -208,7 +207,7 @@ router.post('/reimbursements', (req, res) => {
     return res.status(403).json({ error: 'Non sei membro di questo gruppo.' });
   }
 
-  // Creazione rimborso (fromUserId è l'utente loggato)
+  // Salva il rimborso (l'utente loggato è quello che paga)
   import('../repositories/reimbursements.repo.js').then(reimbursementsRepo => {
     try {
       const reimbursement = reimbursementsRepo.create(parsedGroupId, req.session.userId, parsedToUserId, parsedAmount);

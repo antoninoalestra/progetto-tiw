@@ -1,9 +1,8 @@
-// src/repositories/reimbursements.repo.js
-// Repository per la registrazione dei rimborsi espliciti.
+// Salvataggio dei rimborsi effettuati tra gli utenti
 
 import db from '../db/connection.js';
 
-// Query preparate
+// Query precompilate
 const stmtCreate = db.prepare(`
   INSERT INTO reimbursements (group_id, from_user_id, to_user_id, amount)
   VALUES (@groupId, @fromUserId, @toUserId, @amount)
@@ -20,9 +19,7 @@ const stmtListForGroup = db.prepare(`
   ORDER BY r.created_at DESC
 `);
 
-/**
- * Registra un nuovo rimborso.
- */
+// Salva il rimborso nel database
 export function create(groupId, fromUserId, toUserId, amount) {
   const result = stmtCreate.run({ groupId, fromUserId, toUserId, amount });
   return {
@@ -35,9 +32,7 @@ export function create(groupId, fromUserId, toUserId, amount) {
   };
 }
 
-/**
- * Elenca i rimborsi registrati in un gruppo.
- */
+// Mostra tutti i rimborsi storici per il gruppo
 export function listForGroup(groupId) {
   return stmtListForGroup.all({ groupId });
 }

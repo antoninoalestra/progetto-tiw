@@ -1,6 +1,6 @@
 /* public/styles.css — Stili aggiuntivi per il layout Handlebars */
 
-/* FLASH MESSAGES */
+/* MESSAGGI A COMPARSA */
 .flash {
   padding: 14px 24px;
   border-radius: var(--radius-md);
@@ -36,7 +36,7 @@
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-/* AUTO-DISMISS flash dopo 5 secondi */
+/* Nasconde in automatico i messaggi a comparsa dopo 5 secondi */
 @keyframes flashFadeOut {
 
   0%,
@@ -51,13 +51,13 @@
   }
 }
 
-/* APP HEADER (per pagine autenticate dove la sidebar non è presente) */
+/* INTESTAZIONE DELL'APP (per pagine autenticate dove la barra laterale non è presente) */
 .app-header {
   display: none;
   /* nascosto di default, le pagine usano la sidebar */
 }
 
-/* APP FOOTER */
+/* PIE DI PAGINA DELL'APP */
 .app-footer {
   text-align: center;
   padding: 24px;
@@ -67,7 +67,7 @@
   margin-top: auto;
 }
 
-/* Responsive utility classes */
+/* Classi utili per la reattività su dispositivi mobili e desktop */
 .mobile-only {
   display: none;
 }

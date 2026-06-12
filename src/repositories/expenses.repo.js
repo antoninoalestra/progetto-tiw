@@ -1,12 +1,11 @@
-// src/repositories/expenses.repo.js
-// Repository per la gestione delle spese nel database SQLite.
-// Supporta sia split equo che personalizzato tramite share_amount.
+// Gestione delle spese nel database
+// Gestisce sia divisioni eque che personalizzate tramite share_amount
 
 import db from '../db/connection.js';
 
-// --- Prepared statement compilati all'avvio ---
+// Query precompilate
 
-// Spese di un gruppo con nome del pagante
+// Tutte le spese di un gruppo con nome di chi ha pagato
 const stmtListForGroup = db.prepare(`
   SELECT e.*, u.name AS payer_name
   FROM expenses e
@@ -15,7 +14,7 @@ const stmtListForGroup = db.prepare(`
   ORDER BY e.created_at DESC
 `);
 
-// Spese recenti dell'utente (cross-gruppo) per la dashboard
+// Ultimi movimenti su tutti i gruppi per la dashboard
 const stmtListRecentForUser = db.prepare(`
   SELECT e.*, u.name AS payer_name, g.name AS group_name
   FROM expenses e
@@ -26,21 +25,21 @@ const stmtListRecentForUser = db.prepare(`
   LIMIT @limit
 `);
 
-// Singola spesa per ID
+// Trova la spesa in base all'ID
 const stmtFindById = db.prepare('SELECT * FROM expenses WHERE id = @id');
 
-// Inserisce una nuova spesa
+// Aggiunge la spesa
 const stmtInsertExpense = db.prepare(`
   INSERT INTO expenses (group_id, paid_by, description, amount, category)
   VALUES (@groupId, @paidBy, @description, @amount, @category)
 `);
 
-// Inserisce un partecipante con eventuale importo personalizzato
+// Collega la spesa a un utente, con la sua quota eventuale
 const stmtInsertParticipant = db.prepare(
   'INSERT INTO expense_participants (expense_id, user_id, share_amount) VALUES (@expenseId, @userId, @shareAmount)'
 );
 
-// Partecipanti di una spesa
+// Ottiene l'elenco di chi ha partecipato alla spesa
 const stmtGetParticipants = db.prepare(`
   SELECT u.id, u.name, ep.share_amount
   FROM expense_participants ep
@@ -48,7 +47,7 @@ const stmtGetParticipants = db.prepare(`
   WHERE ep.expense_id = @expenseId
 `);
 
-// Statistiche per categoria di un gruppo (per Chart.js)
+// Raggruppa le spese di un gruppo per categoria (usato nei grafici)
 const stmtGetCategoryStats = db.prepare(`
   SELECT category, SUM(amount) AS total, COUNT(*) AS count
   FROM expenses
@@ -57,38 +56,32 @@ const stmtGetCategoryStats = db.prepare(`
   ORDER BY total DESC
 `);
 
-// Somma totale delle spese in tutti i gruppi di un utente
+// Totale spese complessivo dell'utente
 const stmtGetTotalExpensesForUser = db.prepare(`
   SELECT COALESCE(SUM(e.amount), 0) AS total
   FROM expenses e
   JOIN group_members gm ON gm.group_id = e.group_id AND gm.user_id = @userId
 `);
 
-// Cancella partecipanti di una spesa
+// Elimina i collegamenti degli utenti per una spesa
 const stmtDeleteParticipants = db.prepare('DELETE FROM expense_participants WHERE expense_id = @id');
 
-// Cancella una spesa
+// Elimina la spesa stessa
 const stmtDeleteExpense = db.prepare('DELETE FROM expenses WHERE id = @id');
 
 // --- Funzioni esportate ---
 
-/**
- * Restituisce la lista delle spese di un gruppo con il nome del pagante.
- */
+// Ritorna le spese del gruppo
 export function listForGroup(groupId) {
   return stmtListForGroup.all({ groupId });
 }
 
-/**
- * Restituisce le spese recenti dell'utente (cross-gruppo) per la dashboard.
- */
+// Ritorna le spese recenti dell'utente per la dashboard
 export function listRecentForUser(userId, limit = 10) {
   return stmtListRecentForUser.all({ userId, limit });
 }
 
-/**
- * Restituisce una singola spesa con i partecipanti.
- */
+// Cerca una spesa e ci allega la lista dei partecipanti
 export function findById(id) {
   const expense = stmtFindById.get({ id });
   if (expense) {
@@ -97,32 +90,18 @@ export function findById(id) {
   return expense;
 }
 
-/**
- * Restituisce le statistiche per categoria di un gruppo.
- * Usato da Chart.js per il grafico a torta.
- */
+// Ottiene le somme spese per categoria
 export function getCategoryStats(groupId) {
   return stmtGetCategoryStats.all({ groupId });
 }
 
-/**
- * Restituisce la somma totale delle spese in tutti i gruppi dell'utente.
- */
+// Somma tutto quello speso finora dall'utente nei suoi gruppi
 export function getTotalExpensesForUser(userId) {
   const result = stmtGetTotalExpensesForUser.get({ userId });
   return result ? result.total : 0;
 }
 
-/**
- * Crea una nuova spesa con i partecipanti.
- * @param {number} groupId - ID del gruppo
- * @param {number} paidBy - ID dell'utente che paga
- * @param {string} description - Descrizione della spesa
- * @param {number} amount - Importo totale
- * @param {string} category - Categoria
- * @param {number[]} participantIds - Array di ID partecipanti
- * @param {Object|null} shares - Mappa {userId: importo} per split custom (null = equo)
- */
+// Inserisce spesa e partecipanti all'interno di una transazione, supportando lo split custom
 export const create = db.transaction((groupId, paidBy, description, amount, category, participantIds, shares) => {
   // Inserisci la spesa principale
   const result = stmtInsertExpense.run({
@@ -140,10 +119,7 @@ export const create = db.transaction((groupId, paidBy, description, amount, cate
   return findById(expenseId);
 });
 
-/**
- * Elimina una spesa e le sue associazioni.
- * @param {number} id - ID della spesa da eliminare
- */
+// Cancella la spesa (con transazione per rimuovere anche i partecipanti)
 export const deleteById = db.transaction((id) => {
   stmtDeleteParticipants.run({ id });
   return stmtDeleteExpense.run({ id });

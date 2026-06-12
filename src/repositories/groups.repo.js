@@ -1,11 +1,9 @@
-// src/repositories/groups.repo.js
-// Repository per la gestione dei gruppi nel database SQLite.
-// Ogni funzione utilizza prepared statement compilati una sola volta.
+// Repository per la gestione dei gruppi e dei loro membri
 
 import db from '../db/connection.js';
 import crypto from 'crypto';
 
-// --- Generazione codice invito a 6 caratteri alfanumerici ---
+// Genera un codice alfanumerico casuale di 6 caratteri per l'invito
 function generateInviteCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
@@ -16,9 +14,9 @@ function generateInviteCode() {
   return code;
 }
 
-// --- Prepared statement compilati all'avvio ---
+// Query precompilate
 
-// Recupera tutti i gruppi di cui un utente è membro
+// I gruppi a cui partecipa l'utente
 const stmtListForUser = db.prepare(`
   SELECT g.*,
          (SELECT COUNT(*) FROM group_members gm2 WHERE gm2.group_id = g.id) AS member_count
@@ -28,10 +26,10 @@ const stmtListForUser = db.prepare(`
   ORDER BY g.created_at DESC
 `);
 
-// Recupera un singolo gruppo tramite ID
+// Singolo gruppo per ID
 const stmtFindById = db.prepare('SELECT * FROM groups WHERE id = @id');
 
-// Recupera i membri di un gruppo con le informazioni utente
+// Tutti i membri del gruppo
 const stmtGetMembers = db.prepare(`
   SELECT u.id, u.name, u.email, gm.joined_at
   FROM group_members gm
@@ -40,7 +38,7 @@ const stmtGetMembers = db.prepare(`
   ORDER BY gm.joined_at ASC
 `);
 
-// Anteprima primi 4 membri (per le card della dashboard)
+// I primi 4 membri (per l'interfaccia)
 const stmtGetMembersPreview = db.prepare(`
   SELECT u.id, u.name
   FROM group_members gm
@@ -50,33 +48,28 @@ const stmtGetMembersPreview = db.prepare(`
   LIMIT 4
 `);
 
-// Inserisce un nuovo gruppo
+// Creazione gruppo
 const stmtCreate = db.prepare(
   'INSERT INTO groups (name, description, invite_code, created_by) VALUES (@name, @description, @inviteCode, @createdBy)'
 );
 
-// Cerca un gruppo tramite codice invito
+// Ricerca gruppo per invito
 const stmtFindByInviteCode = db.prepare('SELECT * FROM groups WHERE invite_code = @code');
 
-// Aggiunge un membro al gruppo
+// Iscrizione al gruppo
 const stmtAddMember = db.prepare(
   'INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (@groupId, @userId)'
 );
 
-// Verifica se un utente è membro di un gruppo
+// Controllo appartenenza al gruppo
 const stmtIsMember = db.prepare(
   'SELECT 1 FROM group_members WHERE group_id = @groupId AND user_id = @userId'
 );
 
-// Elimina un gruppo (CASCADE gestisce group_members, expenses, expense_participants)
+// Cancellazione (la foreign key gestisce a cascata i dati collegati)
 const stmtDeleteGroup = db.prepare('DELETE FROM groups WHERE id = @id');
 
-// --- Funzioni esportate ---
-
-/**
- * Restituisce la lista dei gruppi di cui l'utente è membro,
- * con il conteggio dei membri e l'anteprima dei primi 4 membri.
- */
+// Elenca i gruppi dell'utente e aggiunge un'anteprima dei membri
 export function listForUser(userId) {
   const groups = stmtListForUser.all({ userId });
   // Arricchisci ogni gruppo con l'anteprima dei membri
@@ -86,9 +79,7 @@ export function listForUser(userId) {
   return groups;
 }
 
-/**
- * Restituisce un singolo gruppo tramite ID, includendo la lista completa dei membri.
- */
+// Dettagli completi del gruppo e della sua lista membri
 export function findById(id) {
   const group = stmtFindById.get({ id });
   if (group) {
@@ -97,42 +88,29 @@ export function findById(id) {
   return group;
 }
 
-/**
- * Crea un nuovo gruppo con codice invito a 6 caratteri.
- * Restituisce l'oggetto gruppo appena creato.
- */
+// Crea il gruppo e genera subito il codice di invito
 export function create(name, description, createdBy) {
   const inviteCode = generateInviteCode();
   const result = stmtCreate.run({ name, description, inviteCode, createdBy });
   return findById(Number(result.lastInsertRowid));
 }
 
-/**
- * Cerca un gruppo tramite il codice di invito.
- */
+// Trova il gruppo usando il codice invito
 export function findByInviteCode(code) {
   return stmtFindByInviteCode.get({ code });
 }
 
-/**
- * Aggiunge un utente come membro di un gruppo.
- */
+// Aggiunge l'utente al gruppo
 export function addMember(groupId, userId) {
   return stmtAddMember.run({ groupId, userId });
 }
 
-/**
- * Verifica se un utente è membro di un gruppo.
- */
+// Ritorna true se l'utente è nel gruppo
 export function isMember(groupId, userId) {
   return stmtIsMember.get({ groupId, userId }) !== undefined;
 }
 
-/**
- * Elimina un gruppo. ON DELETE CASCADE rimuove automaticamente:
- * group_members, expenses, expense_participants.
- * Solo il creatore (admin) dovrebbe poter chiamare questa funzione.
- */
+// Elimina il gruppo (i dati collegati vengono rimossi a cascata da SQLite)
 export function deleteGroup(id) {
   return stmtDeleteGroup.run({ id });
 }

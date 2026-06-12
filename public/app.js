@@ -1,11 +1,8 @@
-// public/app.js
-// Logica client-side Qotly (AJAX, modali, tabs, grafici)
-
+// Script principale per l'interattività del frontend
+// Gestisce animazioni, caricamento dati dinamico e modali
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ==========================================
-  // FLASH MESSAGES (Auto-dismiss)
-  // ==========================================
+  // Nasconde in automatico i messaggi di notifica in alto dopo 5 secondi
   const flashMessage = document.getElementById('flash-message');
   if (flashMessage) {
     setTimeout(() => {
@@ -14,9 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 5000);
   }
 
-  // ==========================================
-  // TABS SYSTEM (Globale)
-  // ==========================================
+  // Sistema globale per navigare tra schede (tabs)
   const setupTabs = (tabSelector, contentSelector) => {
     const tabs = document.querySelectorAll(tabSelector);
     if (!tabs.length) return;
@@ -24,11 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     tabs.forEach(tab => {
       tab.addEventListener('click', (e) => {
         e.preventDefault();
-        // Remove active class da tutti
+        // Resetta lo stato di tutti i tab
         document.querySelectorAll(tabSelector).forEach(t => t.classList.remove('tab-active', 'active'));
         document.querySelectorAll(contentSelector).forEach(c => c.style.display = 'none');
 
-        // Add active class al target
+        // Evidenzia il tab appena cliccato e mostra il contenuto collegato
         tab.classList.add('tab-active');
         if (tab.classList.contains('nav-link') || tab.classList.contains('bnav-link')) {
           tab.classList.add('active');
@@ -43,14 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Setup tabs dashboard (sidebar nav) e dettaglio gruppo
+  // Applica la logica ai vari tab presenti nell'interfaccia
   setupTabs('.nav-link[data-target]', '.tab-content');
   setupTabs('.bnav-link[data-target]', '.tab-content');
   setupTabs('.tabs .tab-item[data-target]', '.tab-content');
 
-  // ==========================================
-  // MODALE GRUPPI (Crea / Unisciti) - Dashboard
-  // ==========================================
+  // Funzionamento della finestra per creare o unirsi a un gruppo
   const groupModal = document.getElementById('new-group-modal');
   if (groupModal) {
     const btnNuovo = document.getElementById('nav-btn-nuovo');
@@ -71,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeGroupModal.addEventListener('click', () => groupModal.classList.remove('active'));
     }
 
-    // Toggle logica interno modale (Crea vs Join)
+    // Scambia tra "Crea" e "Unisciti" all'interno della finestra
     window.showGroupTab = (tabId) => {
       document.querySelectorAll('#new-group-modal .tab-item').forEach(t => t.classList.remove('tab-active'));
       document.getElementById('group-tab-create').style.display = 'none';
@@ -84,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById(`group-tab-${tabId}`).style.display = 'block';
     };
 
-    // Submit form Creazione AJAX
+    // Invio dei dati per creare un gruppo
     const createForm = document.getElementById('create-group-form');
     if (createForm) {
       createForm.addEventListener('submit', async (e) => {
@@ -109,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Submit form Join AJAX
+    // Invio del codice invito per unirsi a un gruppo
     const joinForm = document.getElementById('join-group-form');
     if (joinForm) {
       joinForm.addEventListener('submit', async (e) => {
@@ -134,9 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ==========================================
-  // DETTAGLIO GRUPPO: Modale Spesa & Split Custom
-  // ==========================================
+  // Finestra per inserire una spesa e dividerla
   const expenseModal = document.getElementById('expense-modal');
   if (expenseModal) {
     const btnExpense = document.getElementById('open-expense-modal');
@@ -149,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnExpenseMobile) btnExpenseMobile.addEventListener('click', openExpense);
     if (closeExpense) closeExpense.addEventListener('click', () => expenseModal.classList.remove('active'));
 
-    // Category pills logic
+    // Seleziona la categoria della spesa usando le "pillole" colorate
     document.querySelectorAll('#category-pills .pill').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('#category-pills .pill').forEach(p => p.classList.remove('pill-active'));
@@ -158,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Split UI logic
+    // Passaggio tra divisione in parti uguali e personalizzata
     let currentSplitMode = 'equal';
     const btnEqual = document.getElementById('btn-split-equal');
     const btnCustom = document.getElementById('btn-split-custom');
@@ -185,10 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
       contEqual.style.display = 'none';
     });
     
-    // Inizializza pulsanti (equal è di default)
+    // Impostazioni iniziali (divisione equa)
     btnEqual.classList.replace('btn-secondary', 'btn-primary');
 
-    // Calcolo live totale custom
+    // Aggiorna il totale in tempo reale quando si inseriscono quote manuali
     const customInputs = document.querySelectorAll('.custom-share-input');
     const customTotalLabel = document.getElementById('custom-split-total');
     customInputs.forEach(input => {
@@ -202,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Submit Spesa AJAX
+    // Salva la spesa chiamando le API
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const groupId = document.getElementById('groupId').value;
@@ -248,9 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ==========================================
-  // DETTAGLIO GRUPPO: Modale Rimborso Reale
-  // ==========================================
+  // Finestra per registrare un rimborso diretto tra due persone
   const reimburseModal = document.getElementById('reimburse-modal');
   if (reimburseModal) {
     const btnReimburse = document.getElementById('open-reimburse-modal');
@@ -286,9 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ==========================================
-  // AZIONI GRUPPO: Copia Invito, Elimina Gruppo
-  // ==========================================
+  // Tasti azione rapida (copia invito ed elimina gruppo)
   const badge = document.getElementById('invite-badge');
   if (badge) {
     badge.addEventListener('click', () => {
@@ -308,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       let groupId = document.getElementById('groupId') ? document.getElementById('groupId').value : null;
       if (!groupId) {
-        // Fallback per ricavare l'ID dall'URL se non c'è input hidden
+        // Prova a leggere l'ID dall'URL se manca il campo nascosto
         const path = window.location.pathname.split('/');
         groupId = path[path.length-1];
       }
@@ -325,9 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ==========================================
-  // SALDI LIVE AJAX (Polling)
-  // ==========================================
+  // Aggiorna i saldi in background ogni 15 secondi (se si è nella pagina del gruppo)
   const balContainer = document.getElementById('balances-container');
   if (balContainer) {
     const groupId = balContainer.getAttribute('data-group-id');
@@ -355,9 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 15000);
   }
 
-  // ==========================================
-  // CHART.JS (Statistiche Categoria)
-  // ==========================================
+  // Disegna il grafico a torta delle spese usando Chart.js
   const statsScript = document.getElementById('stats-data');
   const canvas = document.getElementById('categoryChart');
   

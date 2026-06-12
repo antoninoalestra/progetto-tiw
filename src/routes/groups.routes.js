@@ -1,7 +1,5 @@
-// src/routes/groups.routes.js
-// Rotte HTML per le pagine dei gruppi: dashboard e dettaglio.
-// I dati vengono renderizzati server-side via Handlebars.
-// Le operazioni CRUD passano per le API routes (/api/*) via AJAX.
+// Gestione delle pagine visive dei gruppi e della dashboard
+// I dati vengono preparati nel server e renderizzati dai template Handlebars
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
@@ -14,18 +12,18 @@ import PDFDocument from 'pdfkit';
 const router = Router();
 router.use(requireAuth);
 
-// GET /groups — Dashboard principale con tutti i dati aggregati
+// Pagina principale (Dashboard)
 router.get('/', (req, res) => {
   const userId = req.session.userId;
   const groups = groupsRepo.listForUser(userId);
 
-  // Calcola dati dashboard: bilancio netto, crediti, debiti per gruppo
+  // Calcola i saldi per ogni gruppo dell'utente
   const dashboardData = balancesRepo.getUserDashboardData(userId, groups);
 
-  // Spese recenti cross-gruppo
+  // Prende le ultime 10 spese su tutti i gruppi
   const recentExpenses = expensesRepo.listRecentForUser(userId, 10);
 
-  // Totale spese
+  // Calcola quanto si è speso in totale
   const totalExpenses = expensesRepo.getTotalExpensesForUser(userId);
 
   res.render('groups/list', {
@@ -41,12 +39,12 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET /groups/:id — Dettaglio di un gruppo con spese, saldi, membri
+// Pagina del singolo gruppo (con lista spese, membri e saldi)
 router.get('/:id', (req, res, next) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return next();
 
-  // Controllo autorizzazione
+  // Verifica permessi
   if (!groupsRepo.isMember(groupId, req.session.userId)) {
     return res.status(403).render('errors/404', {
       title: 'Accesso negato',
@@ -73,14 +71,14 @@ router.get('/:id', (req, res, next) => {
     categoryStats,
     isCreator: group.created_by === req.session.userId,
     creatorId: group.created_by,
-    // Serializza i dati per l'uso in JavaScript client-side
+    // Passiamo alcuni dati come stringhe JSON così il frontend (Vue/Vanilla) li può usare direttamente
     groupJson: JSON.stringify(group),
     membersJson: JSON.stringify(group.members),
     categoryStatsJson: JSON.stringify(categoryStats)
   });
 });
 
-// GET /groups/:id/report — Genera e scarica il report PDF del gruppo
+// Genera e scarica il resoconto in PDF del gruppo
 router.get('/:id/report', (req, res, next) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return next();
@@ -97,7 +95,7 @@ router.get('/:id/report', (req, res, next) => {
 
   const settlements = balancesRepo.calculateSettlements(balances);
 
-  // Creazione del documento PDF (senza margini automatici per permettere un header full-width)
+  // Creazione del PDF senza margini per poter fare header colorati a tutto schermo
   const doc = new PDFDocument({ margin: 0, size: 'A4', bufferPages: true });
 
   const safeName = group.name.replace(/[^a-zA-Z0-9]/g, '_');
@@ -105,7 +103,7 @@ router.get('/:id/report', (req, res, next) => {
   res.setHeader('Content-Disposition', `attachment; filename=Qotly_${safeName}.pdf`);
   doc.pipe(res);
 
-  // Palette colori Premium
+  // Colori base per il PDF
   const primary = '#4F46E5';
   const primaryDark = '#312E81';
   const textDark = '#0F172A';
@@ -121,12 +119,12 @@ router.get('/:id/report', (req, res, next) => {
   const marginX = 50;
   const contentWidth = pageWidth - (marginX * 2);
 
-  // HELPER: Disegna linea orizzontale
+  // Funzione d'appoggio per disegnare linee di separazione
   const drawLine = (y, color = border) => {
     doc.moveTo(marginX, y).lineTo(pageWidth - marginX, y).stroke(color);
   };
 
-  // --- TOP HEADER (Full Width) ---
+  // Intestazione principale del PDF
   doc.rect(0, 0, pageWidth, 160).fill(primaryDark);
   
   doc.fontSize(32).font('Helvetica-Bold').fillColor('#FFFFFF').text('Qotly', marginX, 40);
@@ -137,13 +135,13 @@ router.get('/:id/report', (req, res, next) => {
     doc.fontSize(12).font('Helvetica-Oblique').fillColor('#C7D2FE').text(group.description, marginX, 120);
   }
 
-  doc.y = 180; // Riposiziona il cursore sotto l'header
+  doc.y = 180;
 
-  // --- INFO CARDS ---
+  // Box informativi (Dettagli e Riepilogo)
   const cardY = doc.y;
   const cardWidth = (contentWidth - 20) / 2;
   
-  // Card 1: Dettagli Gruppo
+  // Box 1: Dettagli Gruppo
   doc.roundedRect(marginX, cardY, cardWidth, 80, 8).fill(bgLight);
   doc.roundedRect(marginX, cardY, cardWidth, 80, 8).stroke(border);
   doc.fontSize(10).font('Helvetica-Bold').fillColor(textMuted).text('DETTAGLI GRUPPO', marginX + 15, cardY + 15);
@@ -151,7 +149,7 @@ router.get('/:id/report', (req, res, next) => {
   doc.text(`Data Emissione:`, marginX + 15, cardY + 35).font('Helvetica-Bold').text(new Date().toLocaleDateString('it-IT'), marginX + 100, cardY + 35);
   doc.font('Helvetica').text(`Codice Invito:`, marginX + 15, cardY + 50).font('Helvetica-Bold').text(group.invite_code, marginX + 100, cardY + 50);
 
-  // Card 2: Riepilogo
+  // Box 2: Totale speso
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
   doc.roundedRect(marginX + cardWidth + 20, cardY, cardWidth, 80, 8).fill(bgLight);
   doc.roundedRect(marginX + cardWidth + 20, cardY, cardWidth, 80, 8).stroke(border);
@@ -162,7 +160,7 @@ router.get('/:id/report', (req, res, next) => {
 
   doc.y = cardY + 110;
 
-  // --- ELENCO MEMBRI ---
+  // Elenco dei partecipanti
   doc.fontSize(14).font('Helvetica-Bold').fillColor(textDark).text('Membri del Gruppo', marginX, doc.y);
   doc.moveDown(0.5);
   
@@ -174,11 +172,11 @@ router.get('/:id/report', (req, res, next) => {
   doc.fontSize(11).font('Helvetica').fillColor(textMuted).text(memberText, marginX, doc.y, { width: contentWidth, lineGap: 4 });
   doc.moveDown(2);
 
-  // --- TABELLA SPESE ---
+  // Tabella analitica delle spese
   doc.fontSize(14).font('Helvetica-Bold').fillColor(textDark).text('Dettaglio Spese', marginX, doc.y);
   doc.moveDown(0.5);
   
-  // Header tabella
+  // Disegna l'intestazione della tabella
   const tableTop = doc.y;
   doc.roundedRect(marginX, tableTop, contentWidth, 24, 4).fill(primary);
   doc.fillColor('#FFFFFF').fontSize(9).font('Helvetica-Bold');
@@ -218,7 +216,7 @@ router.get('/:id/report', (req, res, next) => {
 
   doc.moveDown(2);
 
-  // --- SITUAZIONE RIMBORSI ---
+  // Resoconto debiti/crediti finali
   if (doc.y > pageHeight - 150) { doc.addPage(); doc.y = marginX; }
   
   doc.fontSize(14).font('Helvetica-Bold').fillColor(textDark).text('Istruzioni di Rimborso', marginX, doc.y);
@@ -246,7 +244,7 @@ router.get('/:id/report', (req, res, next) => {
     doc.fontSize(11).font('Helvetica-Oblique').fillColor(success).text('Tutti i conti sono perfettamente in pari. Nessun rimborso necessario.', marginX);
   }
 
-  // --- AGGIUNTA FOOTER A TUTTE LE PAGINE ---
+  // Applica il footer numerato a ogni pagina del PDF
   const pages = doc.bufferedPageRange();
   for (let i = 0; i < pages.count; i++) {
     doc.switchToPage(i);

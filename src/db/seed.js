@@ -1,30 +1,25 @@
-// src/db/seed.js
-// Script di seed per popolare il database con dati di esempio.
-// Eseguibile con: npm run seed
-// Utilizza db.transaction() per garantire atomicità.
+// Popolamento iniziale del database con dati di test (eseguibile con `npm run seed`)
 
 import db from './connection.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-// Numero di round per bcrypt (10 è un buon compromesso sicurezza/velocità)
 const SALT_ROUNDS = 10;
-
-// Password comune per tutti gli utenti di test
+// Password di default per comodità di test
 const plainPassword = 'password123';
 
 const seed = db.transaction(() => {
-  // 1. Pulizia completa in ordine (rispetta le chiavi esterne)
+  // Svuotiamo le tabelle partendo da quelle dipendenti (per le foreign keys)
   db.exec('DELETE FROM expense_participants');
   db.exec('DELETE FROM expenses');
   db.exec('DELETE FROM group_members');
   db.exec('DELETE FROM groups');
   db.exec('DELETE FROM users');
 
-  // 2. Hash della password comune
+  // Prepariamo la password per tutti i finti utenti
   const passwordHash = bcrypt.hashSync(plainPassword, SALT_ROUNDS);
 
-  // 3. Inserimento utenti di test
+  // Inserimento utenti
   const insertUser = db.prepare(
     'INSERT INTO users (email, password_hash, name) VALUES (@email, @passwordHash, @name)'
   );
@@ -53,7 +48,7 @@ const seed = db.transaction(() => {
     name: 'Sofia Neri'
   });
 
-  // ID degli utenti inseriti (lastInsertRowid restituisce un BigInt in alcune versioni)
+  // Recuperiamo gli ID generati
   const marcoId = Number(marco.lastInsertRowid);
   const giuliaId = Number(giulia.lastInsertRowid);
   const lucaId = Number(luca.lastInsertRowid);
@@ -61,7 +56,7 @@ const seed = db.transaction(() => {
 
   const userIds = [marcoId, giuliaId, lucaId, sofiaId];
 
-  // 4. Creazione di 2 gruppi con invite_code univoco
+  // Creazione dei gruppi di test
   const insertGroup = db.prepare(
     'INSERT INTO groups (name, description, invite_code, created_by) VALUES (@name, @description, @inviteCode, @createdBy)'
   );
@@ -83,7 +78,7 @@ const seed = db.transaction(() => {
   const group1Id = Number(group1.lastInsertRowid);
   const group2Id = Number(group2.lastInsertRowid);
 
-  // 5. Aggiunta di tutti e 4 gli utenti come membri di entrambi i gruppi
+  // Aggiungiamo tutti gli utenti a entrambi i gruppi
   const insertMember = db.prepare(
     'INSERT INTO group_members (group_id, user_id) VALUES (@groupId, @userId)'
   );
@@ -93,7 +88,7 @@ const seed = db.transaction(() => {
     insertMember.run({ groupId: group2Id, userId });
   }
 
-  // 6. Inserimento spese distribuite tra i gruppi
+  // Creiamo qualche spesa di prova distribuita sui gruppi
   const insertExpense = db.prepare(
     'INSERT INTO expenses (group_id, paid_by, description, amount, category) VALUES (@groupId, @paidBy, @description, @amount, @category)'
   );
@@ -102,7 +97,7 @@ const seed = db.transaction(() => {
     'INSERT INTO expense_participants (expense_id, user_id) VALUES (@expenseId, @userId)'
   );
 
-  // Spesa 1 — Gruppo 1: Marco paga la cena per tutti
+  // Spesa di Marco nel gruppo 1
   const expense1 = insertExpense.run({
     groupId: group1Id,
     paidBy: marcoId,
@@ -115,7 +110,7 @@ const seed = db.transaction(() => {
     insertParticipant.run({ expenseId: expense1Id, userId });
   }
 
-  // Spesa 2 — Gruppo 1: Giulia paga il taxi
+  // Spesa di Giulia nel gruppo 1
   const expense2 = insertExpense.run({
     groupId: group1Id,
     paidBy: giuliaId,
@@ -128,7 +123,7 @@ const seed = db.transaction(() => {
     insertParticipant.run({ expenseId: expense2Id, userId });
   }
 
-  // Spesa 3 — Gruppo 2: Luca paga le bollette
+  // Spesa di Luca nel gruppo 2
   const expense3 = insertExpense.run({
     groupId: group2Id,
     paidBy: lucaId,
@@ -141,7 +136,7 @@ const seed = db.transaction(() => {
     insertParticipant.run({ expenseId: expense3Id, userId });
   }
 
-  // Spesa 4 — Gruppo 2: Sofia paga la spesa alimentare
+  // Spesa di Sofia nel gruppo 2
   const expense4 = insertExpense.run({
     groupId: group2Id,
     paidBy: sofiaId,
@@ -161,5 +156,5 @@ const seed = db.transaction(() => {
   console.log(`   - Password comune: ${plainPassword}`);
 });
 
-// Esegui il seed in modo atomico
+// Lanciamo la transazione
 seed();

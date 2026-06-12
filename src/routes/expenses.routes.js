@@ -1,6 +1,5 @@
-// src/routes/expenses.routes.js
-// Rotte per la gestione delle spese: form e creazione.
-// Tutte le rotte sono protette dal middleware requireAuth.
+// Pagine relative alla creazione delle spese
+// Tutte le rotte sono protette da login
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
@@ -9,10 +8,10 @@ import * as groupsRepo from '../repositories/groups.repo.js';
 
 const router = Router();
 
-// Tutte le rotte richiedono autenticazione
+// Proteggiamo tutto il router
 router.use(requireAuth);
 
-// GET /expenses/new?groupId=X — Mostra il form per creare una nuova spesa
+// Mostra il form per aggiungere una spesa
 router.get('/new', (req, res, next) => {
   const groupId = parseInt(req.query.groupId, 10);
   if (isNaN(groupId)) {
@@ -20,7 +19,7 @@ router.get('/new', (req, res, next) => {
     return res.redirect('/groups');
   }
 
-  // Controllo autorizzazione: l'utente deve essere membro del gruppo
+  // Assicuriamoci che l'utente faccia parte del gruppo
   if (!groupsRepo.isMember(groupId, req.session.userId)) {
     return res.status(403).render('errors/404', {
       title: 'Accesso negato',
@@ -37,13 +36,13 @@ router.get('/new', (req, res, next) => {
   });
 });
 
-// POST /expenses — Crea una nuova spesa
+// Riceve i dati del form e crea la spesa
 router.post('/', (req, res) => {
   const { groupId, description, amount, category, participants } = req.body;
   const parsedGroupId = parseInt(groupId, 10);
   const parsedAmount = parseFloat(amount);
 
-  // Validazione campi obbligatori
+  // Verifica che i dati obbligatori siano corretti
   if (isNaN(parsedGroupId)) {
     req.session.flash = { type: 'error', message: 'Gruppo non valido.' };
     return res.redirect('/groups');
@@ -59,32 +58,32 @@ router.post('/', (req, res) => {
     return res.redirect(`/expenses/new?groupId=${parsedGroupId}`);
   }
 
-  // Controllo autorizzazione: l'utente deve essere membro del gruppo
+  // Verifica appartenenza al gruppo
   if (!groupsRepo.isMember(parsedGroupId, req.session.userId)) {
     req.session.flash = { type: 'error', message: 'Non sei membro di questo gruppo.' };
     return res.redirect('/groups');
   }
 
-  // Gestione partecipanti: se non specificati, usa tutti i membri del gruppo
+  // Se non si selezionano partecipanti espliciti, partecipano tutti i membri del gruppo
   let participantIds;
   if (participants) {
-    // participants può essere un singolo valore o un array
+    // Trasforma i partecipanti in un array di numeri
     participantIds = Array.isArray(participants)
       ? participants.map(Number)
       : [Number(participants)];
   } else {
-    // Se non specificati, tutti i membri del gruppo partecipano
+    // Recupera tutti i membri
     const group = groupsRepo.findById(parsedGroupId);
     participantIds = group.members.map(m => m.id);
   }
 
-  // Validazione: almeno un partecipante
+  // Ci deve essere almeno qualcuno che paga
   if (participantIds.length === 0) {
     req.session.flash = { type: 'error', message: 'Devi selezionare almeno un partecipante.' };
     return res.redirect(`/expenses/new?groupId=${parsedGroupId}`);
   }
 
-  // Crea la spesa in modo atomico (spesa + partecipanti in transazione)
+  // Salva la spesa nel database
   expensesRepo.create(
     parsedGroupId,
     req.session.userId,
@@ -98,7 +97,7 @@ router.post('/', (req, res) => {
   return res.redirect(`/groups/${parsedGroupId}`);
 });
 
-// POST /expenses/:id/delete — Elimina una spesa
+// Elimina una spesa esistente
 router.post('/:id/delete', (req, res) => {
   const expenseId = parseInt(req.params.id, 10);
   
@@ -113,7 +112,7 @@ router.post('/:id/delete', (req, res) => {
     return res.redirect('/groups');
   }
 
-  // Controllo autorizzazione: l'utente deve essere il creatore della spesa
+  // Solo chi ha pagato (il creatore della spesa) può eliminarla
   if (expense.paid_by !== req.session.userId) {
     req.session.flash = { type: 'error', message: 'Non sei autorizzato a eliminare questa spesa. Solo chi l\'ha creata può farlo.' };
     return res.redirect(`/groups/${expense.group_id}`);

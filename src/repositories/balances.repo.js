@@ -1,12 +1,10 @@
-// src/repositories/balances.repo.js
-// Repository per il calcolo dei saldi.
-// Supporta sia split equo (share_amount NULL) che personalizzato.
+// Calcolo dei saldi all'interno dei gruppi
+// Gestisce sia la divisione in parti uguali che quella personalizzata
 
 import db from '../db/connection.js';
 
-// CTE che calcola i saldi di ogni membro di un gruppo.
-// Usa COALESCE: se share_amount è impostato (split custom), lo usa;
-// altrimenti calcola la quota equa (importo / numero partecipanti).
+// Query principale per ottenere il saldo di ogni partecipante.
+// Se l'importo personalizzato (share_amount) non c'è, divide la spesa in parti uguali.
 const stmtGetBalances = db.prepare(`
   WITH pagamenti AS (
     SELECT ep.user_id,
@@ -48,20 +46,12 @@ const stmtGetBalances = db.prepare(`
   ORDER BY saldo DESC
 `);
 
-/**
- * Calcola i saldi di tutti i membri di un gruppo.
- * saldo > 0 → credito (gli devono soldi)
- * saldo < 0 → debito (deve soldi)
- */
+// Recupera i saldi per il gruppo (positivo = deve ricevere, negativo = deve pagare)
 export function getBalances(groupId) {
   return stmtGetBalances.all({ groupId });
 }
 
-/**
- * Calcola i dati aggregati per la dashboard dell'utente.
- * Itera su ogni gruppo dell'utente e calcola il saldo individuale.
- * Restituisce: netBalance, totalCredit, totalOwed, details per gruppo.
- */
+// Genera i dati riassuntivi della dashboard aggregando tutti i gruppi dell'utente
 export function getUserDashboardData(userId, groups) {
   let totalCredit = 0;
   let totalOwed = 0;
@@ -93,10 +83,7 @@ export function getUserDashboardData(userId, groups) {
   };
 }
 
-/**
- * Calcola i rimborsi esatti (chi deve a chi) basandosi sui saldi netti.
- * Algoritmo greedy che accoppia i maggiori debitori ai maggiori creditori.
- */
+// Algoritmo greedy per calcolare chi deve pagare chi in base ai saldi netti
 export function calculateSettlements(balances) {
   const debtors = [];
   const creditors = [];

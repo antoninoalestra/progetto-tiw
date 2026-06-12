@@ -33,9 +33,6 @@ Il progetto fa uso di moderne tecnologie web, rispettando i vincoli accademici (
 | **Database** | SQLite (`better-sqlite3`). **Nota:** Il DB è interamente gestito come file locale (`data/app.db`), agendo come storage serverless persistente (simulazione avanzata di database) |
 | **Librerie** | `pdfkit` (Generazione PDF), `bcrypt` (Sicurezza/Hashing), `express-session` (Sessioni) |
 
-### Divieti Rispettati
-Come da specifiche, l'applicazione **non utilizza** framework CSS (come Bootstrap o Tailwind) né framework JavaScript (React, Vue, ecc.). Tutto il layout è scritto rigorosamente da zero, enfatizzando le abilità di design "puro". L'interazione coi dati non si appoggia a server SQL/NoSQL esterni, ma rimane locale e portatile nel file system.
-
 ---
 
 ## Architettura

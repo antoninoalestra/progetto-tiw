@@ -3,7 +3,7 @@
 
 <div class="app-layout">
 
-  {{!-- SIDEBAR DESKTOP --}}
+  {{!-- BARRA LATERALE DESKTOP --}}
   <aside class="sidebar-layout" id="app-sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">Qotly</div>
@@ -38,7 +38,7 @@
     </div>
   </aside>
 
-  {{!-- MAIN CONTENT --}}
+  {{!-- CONTENUTO PRINCIPALE --}}
   <div class="main-wrapper">
 
     <header class="topbar">
@@ -52,7 +52,7 @@
 
       {{!-- TAB: DASHBOARD --}}
       <section id="tab-home" class="tab-content active animate-in">
-        {{!-- Hero Balance Card --}}
+        {{!-- Scheda del Bilancio Principale --}}
         <div class="hero-balance-card">
           <div class="hero-label">Bilancio Totale</div>
           <div class="hero-amount tabular-nums">{{formatEuro netBalance}}</div>
@@ -68,7 +68,7 @@
           </div>
         </div>
 
-        {{!-- Stats Grid --}}
+        {{!-- Griglia delle Statistiche --}}
         <div class="stats-grid">
           <div class="card stat-card">
             <span class="stat-label">Spese Totali</span>
@@ -84,7 +84,7 @@
           </div>
         </div>
 
-        {{!-- Dashboard Widgets --}}
+        {{!-- Elementi della Dashboard --}}
         <div class="dashboard-widgets">
           {{!-- Attività Recente --}}
           <div class="card">
@@ -113,7 +113,7 @@
             </div>
           </div>
 
-          {{!-- Settle Up (dettagli saldi per gruppo) --}}
+          {{!-- Salda i Conti (dettagli saldi per gruppo) --}}
           <div class="card">
             <div class="card-header">
               <h3 style="margin: 0; font-size: 16px;">Settle Up</h3>
@@ -273,7 +273,7 @@
   </div>
 </div>
 
-{{!-- BOTTOM NAV (Mobile) --}}
+{{!-- BARRA DI NAVIGAZIONE INFERIORE (Mobile) --}}
 <nav class="bottom-nav mobile-only">
   <div class="bottom-nav-inner">
     <a href="#" class="bnav-link active" data-target="tab-home">
@@ -295,7 +295,7 @@
   </div>
 </nav>
 
-{{!-- MODAL: NUOVO GRUPPO (Crea + Unisciti unificati) --}}
+{{!-- FINESTRA MODALE: NUOVO GRUPPO (Crea + Unisciti unificati) --}}
 <div id="new-group-modal" class="modal-overlay">
   <div class="modal-card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -310,7 +310,7 @@
       <div class="tab-item" onclick="showGroupTab('join')">Unisciti</div>
     </div>
 
-    {{!-- Tab: Crea --}}
+    {{!-- Scheda: Crea --}}
     <div id="group-tab-create" style="display: block; padding-top: 8px;">
       <p style="color: var(--text-muted); margin-bottom: 24px;">Crea un nuovo gruppo e invita i tuoi amici per dividere le spese.</p>
       <form id="create-group-form">
@@ -326,7 +326,7 @@
       </form>
     </div>
 
-    {{!-- Tab: Unisciti --}}
+    {{!-- Scheda: Unisciti --}}
     <div id="group-tab-join" style="display: none; padding-top: 8px;">
       <p style="color: var(--text-muted); margin-bottom: 24px;">Hai un codice di invito? Inseriscilo qui sotto per entrare nel gruppo.</p>
       <form id="join-group-form">
