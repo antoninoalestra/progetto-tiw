@@ -1,4 +1,6 @@
-// Gestione dell'autenticazione: login, registrazione, logout e profilo
+// Controller per la gestione dell'autenticazione e del ciclo di vita della sessione.
+// Fornisce gli endpoint per login, registrazione, terminazione della sessione (logout)
+// e aggiornamento del profilo utente. Implementa hashing crittografico tramite bcrypt.
 
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
@@ -32,14 +34,16 @@ router.post('/login', async (req, res) => {
     return res.redirect('/login');
   }
 
-  // Controlla la password
+  // Validazione crittografica della password confrontando il plaintext in ingresso
+  // con l'hash persistito nel database.
   const match = await bcrypt.compare(password, user.password_hash);
   if (!match) {
     req.session.flash = { type: 'error', message: 'Credenziali non valide.' };
     return res.redirect('/login');
   }
 
-  // Tutto corretto: salviamo l'utente in sessione e andiamo alla dashboard
+  // Autenticazione completata con successo. Avvia la tracciatura della sessione
+  // assegnando l'identificatore univoco dell'utente (userId).
   req.session.userId = user.id;
   req.session.flash = { type: 'success', message: `Bentornato, ${user.name}!` };
   return res.redirect('/groups');
@@ -76,17 +80,20 @@ router.post('/register', async (req, res) => {
     return res.redirect('/register');
   }
 
-  // Salva il nuovo utente
+  // Creazione e persistenza del nuovo utente. La password viene elaborata tramite
+  // funzione di hashing irreversibile prima del salvataggio su database.
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   const result = usersRepo.create(name, email, passwordHash);
 
-  // Eseguiamo il login automatico al termine della registrazione
+  // Inizializzazione implicita della sessione al completamento della registrazione
+  // per migliorare la user experience evitando un login esplicito.
   req.session.userId = Number(result.lastInsertRowid);
   req.session.flash = { type: 'success', message: 'Registrazione completata! Benvenuto su Qotly.' };
   return res.redirect('/groups');
 });
 
-// Distrugge la sessione per il logout
+// Endpoint per la distruzione della sessione (Logout).
+// Invalida l'identificatore utente lato server e reindirizza alla view di login.
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');

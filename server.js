@@ -1,5 +1,5 @@
-// Configurazione principale dell'app Qotly
-
+// Configurazione principale del server e dell'applicazione Qotly.
+// Inizializza Express, il motore di rendering, la gestione delle sessioni e il routing globale.
 import express from 'express';
 import { engine } from 'express-handlebars';
 import session from 'express-session';
@@ -13,7 +13,9 @@ import apiRoutes from './src/routes/api.routes.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Motore di template Handlebars e helpers
+// Configurazione del motore di template Handlebars.
+// Include la registrazione di helper personalizzati necessari per la formattazione 
+// di valute, date e per la logica condizionale direttamente nelle viste.
 app.engine('hbs', engine({
   extname: '.hbs',
   defaultLayout: 'main',
@@ -37,7 +39,9 @@ app.engine('hbs', engine({
 app.set('view engine', 'hbs');
 app.set('views', 'views');
 
-// Vari middleware base
+// Inizializzazione dei middleware fondamentali.
+// Assolvono ai compiti di parsing dei form (urlencoded/json), distribuzione dei file statici 
+// e gestione sicura delle sessioni utente tramite cookie.
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static('public'));
@@ -51,7 +55,9 @@ app.use(session({
 
 app.use(flashMiddleware);
 
-// Rende i dati dell'utente sempre disponibili nei template
+// Middleware per l'iniezione dei dati utente.
+// Se presente una sessione attiva, l'oggetto utente viene recuperato dal database
+// e reso disponibile a livello globale per il motore di rendering tramite res.locals.
 app.use((req, res, next) => {
   if (req.session.userId) {
     res.locals.currentUser = findById(req.session.userId);
@@ -59,7 +65,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Setup dei router
+// Definizione e mount dei moduli di routing.
 app.use('/', authRoutes);
 app.use('/groups', groupsRoutes);
 app.use('/expenses', expensesRoutes);
@@ -70,13 +76,16 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Fallback 404
+// Gestione del fallback per richieste a risorse inesistenti (HTTP 404).
+// Restituisce la pagina di errore standard o una risposta JSON a seconda dell'Accept header.
 app.use((req, res) => {
   if (req.accepts('html')) return res.status(404).render('errors/404', { title: 'Pagina non trovata' });
   res.status(404).json({ error: 'Not found' });
 });
 
-// Gestione errori globali (Express richiede 4 argomenti per il middleware degli errori)
+// Middleware globale per la gestione delle eccezioni (HTTP 500).
+// Intercetta errori imprevisti per prevenire l'arresto del processo Node.js e fornisce 
+// un feedback controllato all'utente.
 app.use((err, req, res, next) => {
   console.error(err);
   const detail = process.env.NODE_ENV !== 'production' ? err.message : null;

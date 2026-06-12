@@ -1,8 +1,10 @@
-// Script principale per l'interattività del frontend
-// Gestisce animazioni, caricamento dati dinamico e modali
+// Entry point principale per la logica client-side dell'applicazione.
+// Gestisce il ciclo di vita dei componenti UI, chiamate asincrone tramite Fetch API 
+// e la manipolazione dinamica del DOM in assenza di framework reattivi.
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Nasconde in automatico i messaggi di notifica in alto dopo 5 secondi
+  // Gestione del ciclo di vita dei flash messages.
+  // Applica una transizione CSS di fade-out e rimuove l'elemento dal DOM dopo un delay di 5 secondi.
   const flashMessage = document.getElementById('flash-message');
   if (flashMessage) {
     setTimeout(() => {
@@ -11,7 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 5000);
   }
 
-  // Sistema globale per navigare tra schede (tabs)
+  // Pattern architetturale per la gestione della navigazione a schede (Tab Navigation).
+  // Isola l'attivazione visiva del tab e la conseguente visualizzazione del contenuto target
+  // nascondendo i nodi DOM fratelli.
   const setupTabs = (tabSelector, contentSelector) => {
     const tabs = document.querySelectorAll(tabSelector);
     if (!tabs.length) return;
@@ -43,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabs('.bnav-link[data-target]', '.tab-content');
   setupTabs('.tabs .tab-item[data-target]', '.tab-content');
 
-  // Funzionamento della finestra per creare o unirsi a un gruppo
+  // Inizializzazione della componente Modale per la creazione o adesione ai gruppi.
   const groupModal = document.getElementById('new-group-modal');
   if (groupModal) {
     const btnNuovo = document.getElementById('nav-btn-nuovo');
@@ -77,7 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById(`group-tab-${tabId}`).style.display = 'block';
     };
 
-    // Invio dei dati per creare un gruppo
+    // Event listener per la sottomissione del form di creazione gruppo.
+    // Intercetta l'evento di submit per prevenire il ricaricamento della pagina 
+    // e inoltrare un payload JSON tramite fetch verso l'endpoint API dedicato.
     const createForm = document.getElementById('create-group-form');
     if (createForm) {
       createForm.addEventListener('submit', async (e) => {
@@ -127,7 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Finestra per inserire una spesa e dividerla
+  // Inizializzazione della componente Modale per la registrazione delle transazioni di spesa.
+  // Include la gestione dello stato UI per la ripartizione equa o personalizzata degli importi.
   const expenseModal = document.getElementById('expense-modal');
   if (expenseModal) {
     const btnExpense = document.getElementById('open-expense-modal');
@@ -140,7 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnExpenseMobile) btnExpenseMobile.addEventListener('click', openExpense);
     if (closeExpense) closeExpense.addEventListener('click', () => expenseModal.classList.remove('active'));
 
-    // Seleziona la categoria della spesa usando le "pillole" colorate
+    // Logica di selezione UI per la componente a pillole (Category selector).
+    // Sincronizza lo stato visivo delle pillole con l'input hidden correlato.
     document.querySelectorAll('#category-pills .pill').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('#category-pills .pill').forEach(p => p.classList.remove('pill-active'));
@@ -149,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Passaggio tra divisione in parti uguali e personalizzata
+    // Gestione dello switch di modalità per la ripartizione della spesa 
+    // (Equa vs Personalizzata) mediante toggling dinamico della visibilità dei container.
     let currentSplitMode = 'equal';
     const btnEqual = document.getElementById('btn-split-equal');
     const btnCustom = document.getElementById('btn-split-custom');
@@ -179,7 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Impostazioni iniziali (divisione equa)
     btnEqual.classList.replace('btn-secondary', 'btn-primary');
 
-    // Aggiorna il totale in tempo reale quando si inseriscono quote manuali
+    // Listener reattivo per il calcolo cumulativo in tempo reale delle quote personalizzate.
+    // Aggiorna l'etichetta del totale per fornire feedback di validazione istantaneo.
     const customInputs = document.querySelectorAll('.custom-share-input');
     const customTotalLabel = document.getElementById('custom-split-total');
     customInputs.forEach(input => {
@@ -275,7 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Tasti azione rapida (copia invito ed elimina gruppo)
+  // Gestione dell'azione rapida per la copia del codice d'invito.
+  // Interfaccia con la Clipboard API fornendo un feedback visivo effimero allo scatto.
   const badge = document.getElementById('invite-badge');
   if (badge) {
     badge.addEventListener('click', () => {
@@ -312,7 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Aggiorna i saldi in background ogni 15 secondi (se si è nella pagina del gruppo)
+  // Implementazione di un meccanismo di short-polling per l'aggiornamento asincrono dei saldi.
+  // Esegue richieste periodiche all'endpoint REST ogni 15 secondi per re-idratare 
+  // il container dei bilanci senza impattare sul thread principale.
   const balContainer = document.getElementById('balances-container');
   if (balContainer) {
     const groupId = balContainer.getAttribute('data-group-id');
@@ -340,7 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 15000);
   }
 
-  // Disegna il grafico a torta delle spese usando Chart.js
+  // Inizializzazione del componente Chart.js per la rappresentazione statistica delle spese.
+  // Deserializza il payload JSON precaricato nel DOM dal backend.
   const statsScript = document.getElementById('stats-data');
   const canvas = document.getElementById('categoryChart');
   

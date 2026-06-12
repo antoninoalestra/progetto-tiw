@@ -1,5 +1,6 @@
-// Gestione delle pagine visive dei gruppi e della dashboard
-// I dati vengono preparati nel server e renderizzati dai template Handlebars
+// Controller di routing per la gestione e visualizzazione delle entità Group.
+// Coordina il recupero dei dati dai repository e la conseguente iniezione nei template Handlebars
+// per generare l'interfaccia utente (dashboard e dettaglio di gruppo).
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
@@ -12,18 +13,19 @@ import PDFDocument from 'pdfkit';
 const router = Router();
 router.use(requireAuth);
 
-// Pagina principale (Dashboard)
+// Endpoint (GET) per la visualizzazione della Dashboard utente.
+// Fornisce un aggregato generale delle affiliazioni, bilanci parziali e cronologia spese.
 router.get('/', (req, res) => {
   const userId = req.session.userId;
   const groups = groupsRepo.listForUser(userId);
 
-  // Calcola i saldi per ogni gruppo dell'utente
+  // Calcolo aggregato dei bilanci netti (crediti/debiti) distribuiti su tutti i gruppi attivi
   const dashboardData = balancesRepo.getUserDashboardData(userId, groups);
 
-  // Prende le ultime 10 spese su tutti i gruppi
+  // Estrazione dell'estratto conto recente per alimentare il feed delle attività
   const recentExpenses = expensesRepo.listRecentForUser(userId, 10);
 
-  // Calcola quanto si è speso in totale
+  // Estrazione del volume finanziario complessivo gestito dall'utente
   const totalExpenses = expensesRepo.getTotalExpensesForUser(userId);
 
   res.render('groups/list', {
@@ -39,12 +41,14 @@ router.get('/', (req, res) => {
   });
 });
 
-// Pagina del singolo gruppo (con lista spese, membri e saldi)
+// Endpoint (GET) per il recupero analitico di un singolo gruppo.
+// Popola la vista di dettaglio includendo lo storico transazioni, statisiche di categoria,
+// saldi attuali e i rimborsi suggeriti.
 router.get('/:id', (req, res, next) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return next();
 
-  // Verifica permessi
+  // Controllo autorizzativo: previene accessi a gruppi di cui non si è membri
   if (!groupsRepo.isMember(groupId, req.session.userId)) {
     return res.status(403).render('errors/404', {
       title: 'Accesso negato',
@@ -71,14 +75,18 @@ router.get('/:id', (req, res, next) => {
     categoryStats,
     isCreator: group.created_by === req.session.userId,
     creatorId: group.created_by,
-    // Passiamo alcuni dati come stringhe JSON così il frontend (Vue/Vanilla) li può usare direttamente
+    // Serializzazione dei payload informativi in formato JSON per l'iniezione
+    // diretta nel DOM, consentendo alle logiche frontend (vanilla/Chart.js) di operare 
+    // sui dati senza invocare API addizionali in fase di inizializzazione.
     groupJson: JSON.stringify(group),
     membersJson: JSON.stringify(group.members),
     categoryStatsJson: JSON.stringify(categoryStats)
   });
 });
 
-// Genera e scarica il resoconto in PDF del gruppo
+// Endpoint (GET) per la generazione asincrona di un report PDF.
+// Sintetizza i bilanci finali, l'estratto conto e le istruzioni di rimborso (settlements)
+// utilizzando la libreria pdfkit.
 router.get('/:id/report', (req, res, next) => {
   const groupId = parseInt(req.params.id, 10);
   if (isNaN(groupId)) return next();
@@ -95,7 +103,8 @@ router.get('/:id/report', (req, res, next) => {
 
   const settlements = balancesRepo.calculateSettlements(balances);
 
-  // Creazione del PDF senza margini per poter fare header colorati a tutto schermo
+  // Inizializzazione dell'istanza PDFDocument. 
+  // Configurazione dei margini azzerata per permettere rendering edge-to-edge dell'header.
   const doc = new PDFDocument({ margin: 0, size: 'A4', bufferPages: true });
 
   const safeName = group.name.replace(/[^a-zA-Z0-9]/g, '_');

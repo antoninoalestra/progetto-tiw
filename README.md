@@ -30,24 +30,39 @@ Il progetto fa uso di moderne tecnologie web, rispettando i vincoli accademici (
 | **Backend** | Node.js, Express.js |
 | **Frontend** | HTML5, CSS3 (Vanilla: Flexbox/Grid, variabili, micro-animazioni), JavaScript ES6+ |
 | **View Engine**| Handlebars (`express-handlebars`) per il Server-Side Rendering (SSR) |
-| **Database** | SQLite (`better-sqlite3`). **Nota:** Il DB è interamente gestito come file locale (`data/app.db`), agendo come storage serverless persistente (simulazione avanzata di database) |
+| **Database** | SQLite (`better-sqlite3`). **Nota:** Il DB è interamente gestito come file locale (`data/app.db`) |
 | **Librerie** | `pdfkit` (Generazione PDF), `bcrypt` (Sicurezza/Hashing), `express-session` (Sessioni) |
 
 ---
 
-## Architettura
+## Struttura del Database (Schema)
 
-L'organizzazione del codice segue il pattern **MVC**:
-- `src/repositories/`: **(Models)** Interazione col database SQLite, prepared statements per performance ed esecuzione query sicure.
-- `src/routes/`: **(Controllers)** Logica di routing, gestione middleware di autenticazione e validazione dei dati.
-- `views/`: **(Views)** Template grafici `.hbs` separati tra layout base, componenti parziali (es. toast flash) e singole pagine.
-- `public/`: Assets statici (stili CSS modulari e script lato client).
+Il database è strutturato su base relazionale utilizzando SQLite. Di seguito i dettagli delle tabelle implementate:
+
+1. **`users`**: Tabella anagrafica degli utenti. Memorizza `id`, `name`, `email` (univoca) e `password_hash` (criptata tramite bcrypt).
+2. **`groups`**: Tabella dei gruppi. Memorizza le informazioni del gruppo, tra cui `name`, `description` e l'`invite_code` (univoco e generato dinamicamente). Contiene la foreign key `created_by` verso `users`.
+3. **`group_members`**: Tabella di associazione (molti-a-molti) che collega gli utenti ai gruppi di cui fanno parte, con chiave primaria composta (`group_id`, `user_id`).
+4. **`expenses`**: Memorizza i dati principali delle transazioni economiche: `group_id`, utente pagante (`paid_by`), `amount`, `description`, `category` e timestamp della spesa.
+5. **`expense_participants`**: Tabella di associazione per ripartire le quote. Oltre a collegare `expense_id` e `user_id`, include il campo fondamentale `share_amount` per permettere la divisione con quote personalizzate (se nullo, la spesa è da intendersi in parti uguali).
+6. **`reimbursements`**: Storico dei rimborsi fisici effettuati tra due utenti (`from_user_id`, `to_user_id`) all'interno di uno specifico gruppo, con relativo `amount`.
+
+Viene fatto un uso massiccio dei vincoli `ON DELETE CASCADE` per garantire l'integrità referenziale senza lasciare record "orfani" (ad esempio, cancellando un gruppo si cancellano in cascata tutti i suoi membri, spese e rimborsi).
+
+---
+
+## Implementazione della Traccia (Requisiti)
+
+Il progetto copre interamente ed estende tutti i punti richiesti dalla traccia dell'esame. Di seguito la tabella riepilogativa:
+
+| Funzionalità Implementate in Qotly | Livello della Traccia |
+|------------------------------------|-----------------------|
+| • Registrazione e accesso<br>• Creazione gruppo<br>• Sistema di invito tramite codice<br>• Inserimento spesa<br>• Visualizzazione spese<br>• Visualizzazione saldi | Livello 1 (Sistema Base) |
+| • Quote personalizzate ed esclusione membri<br>• Calcolo debiti minimi (Algoritmo Greedy)<br>• Categorie di spesa<br>• Registrazione rimborsi<br>• Storico dettagliato delle operazioni | Livello 2 (Divisioni Avanzate) |
+| • Esportazione del riepilogo in PDF (Stream)<br>• Grafici delle spese per categoria | Livello 3 (Estensioni) |
 
 ---
 
 ## Guida all'Avvio Rapido
-
-Segui questi passaggi per scaricare, configurare ed eseguire l'applicazione sul tuo computer.
 
 ### 1. Prerequisiti
 Assicurati di avere installato sul tuo sistema:
@@ -63,13 +78,22 @@ cd progetto-tiw
 npm install
 ```
 
-### 3. Popolamento Database (Opzionale ma raccomandato)
+### 3. Popolamento Database (Seed)
 Per testare subito le funzionalità senza dover creare utenti da zero, puoi "seminare" (seed) il database con dati predefiniti di prova:
 
 ```bash
 npm run seed
 ```
-*(Questo comando crea il file `data/app.db` con tabelle, utenti fittizi, gruppi, spese e rimborsi).*
+
+**(Utenti pre-registrati per i test)**
+L'esecuzione del seed creerà il file `data/app.db` inserendo i seguenti utenti pronti all'uso:
+
+| Nome Utente | Email (Login) | Password |
+|---|---|---|
+| Marco Rossi | `marco@example.com` | `password123` |
+| Giulia Bianchi | `giulia@example.com` | `password123` |
+| Luca Verdi | `luca@example.com` | `password123` |
+| Sofia Neri | `sofia@example.com` | `password123` |
 
 ### 4. Esecuzione del Server
 Avvia il server di sviluppo. Questo comando abilita **nodemon**, riavviando automaticamente l'app in caso di modifiche al codice:
@@ -78,23 +102,12 @@ Avvia il server di sviluppo. Questo comando abilita **nodemon**, riavviando auto
 npm run dev
 ```
 
-*(Se vuoi avviare l'app in modalità standard, usa `npm start`).*
-
 ### 5. Utilizzo dell'App
 Apri il tuo browser preferito (Chrome, Safari, Firefox, ecc.) e digita il seguente indirizzo:
 
 ```text
 http://localhost:3000
 ```
+Accedi utilizzando uno degli account elencati nella tabella per testare la piattaforma.
 
-Se hai eseguito il comando `seed` al punto 3, puoi accedere con le credenziali di test:
-* **Email**: `mario@example.com` (o `giulia@example.com`)
-* **Password**: `password123`
-
----
-
-## Note aggiuntive per lo studio e la valutazione
-Tutto il codice complesso (metodi backend, controller, configurazione del database) è commentato in lingua italiana per favorire la chiarezza e la leggibilità didattica.
-Il design punta all'effetto "WOW", con micro-interazioni sui pulsanti, finestre modali fluide dal basso, ombreggiatura dinamica e messaggi toast che fluttuano sullo schermo senza scompaginare il layout.
-
-Buono studio e buona divisione delle spese!
+Buona divisione delle spese con Qotly!

@@ -1,5 +1,6 @@
-// Endpoint richiamati dal frontend via AJAX
-// Tutte queste rotte richiedono un utente loggato
+// Controller API per la gestione asincrona delle entità (AJAX/Fetch).
+// Espone gli endpoint per operazioni CRUD e il recupero di dati serializzati in formato JSON.
+// Tutte le rotte definite in questo modulo richiedono l'autenticazione tramite sessione.
 
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
@@ -8,11 +9,10 @@ import * as groupsRepo from '../repositories/groups.repo.js';
 import * as expensesRepo from '../repositories/expenses.repo.js';
 
 const router = Router();
-router.use(requireAuth);
+router.use(requireAuth); // Middleware di autorizzazione globale per il router API
 
-// =============================================
+
 // GRUPPI
-// =============================================
 
 // Crea un nuovo gruppo
 router.post('/groups', (req, res) => {
@@ -82,9 +82,9 @@ router.get('/groups/:id/members', (req, res) => {
   return res.json({ members: group.members });
 });
 
-// =============================================
+
 // SALDI
-// =============================================
+
 
 // Restituisce i saldi ricalcolati per aggiornare l'interfaccia
 router.get('/groups/:id/balances', (req, res) => {
@@ -99,9 +99,9 @@ router.get('/groups/:id/balances', (req, res) => {
   return res.json({ balances });
 });
 
-// =============================================
+
 // STATISTICHE
-// =============================================
+
 
 // Dati per i grafici a torta delle spese
 router.get('/groups/:id/stats', (req, res) => {
@@ -116,17 +116,18 @@ router.get('/groups/:id/stats', (req, res) => {
   return res.json({ stats });
 });
 
-// =============================================
-// SPESE
-// =============================================
 
-// Registra una nuova spesa
+// SPESE
+
+
+// Endpoint per la creazione di una nuova transazione di spesa.
+// Supporta logiche di ripartizione diversificate: equa ('equal') o frazionata manualmente ('custom').
 router.post('/expenses', (req, res) => {
   const { groupId, description, amount, category, participants, splitMode, shares } = req.body;
   const parsedGroupId = parseInt(groupId, 10);
   const parsedAmount = parseFloat(amount);
 
-  // Validazione dei dati ricevuti
+  // Validazione dei parametri in ingresso.
   if (isNaN(parsedGroupId)) {
     return res.status(400).json({ error: 'Gruppo non valido.' });
   }
@@ -140,7 +141,8 @@ router.post('/expenses', (req, res) => {
     return res.status(403).json({ error: 'Non sei membro di questo gruppo.' });
   }
 
-  // Determina chi ha partecipato alla spesa (tutti o solo alcuni scelti)
+  // Risoluzione dei partecipanti: se non forniti esplicitamente nel payload,
+  // la spesa viene automaticamente associata all'intero pool dei membri del gruppo.
   let participantIds;
   if (participants && participants.length > 0) {
     participantIds = participants.map(Number);
@@ -153,8 +155,9 @@ router.post('/expenses', (req, res) => {
     return res.status(400).json({ error: 'Devi selezionare almeno un partecipante.' });
   }
 
-  // Se lo split non è in parti uguali, calcola le quote esatte fornite dall'utente
-  let parsedShares = null;
+  // Elaborazione delle quote in caso di ripartizione personalizzata (splitMode === 'custom').
+  // Verifica la validità e la congruenza degli importi dichiarati per ciascun utente.
+  let parsedShares = null; // Se null, viene ripartita equamente.
   if (splitMode === 'custom' && shares) {
     parsedShares = {};
     let sharesTotal = 0;
@@ -166,7 +169,8 @@ router.post('/expenses', (req, res) => {
       parsedShares[Number(userId)] = val;
       sharesTotal += val;
     }
-    // Controlla che le quote personalizzate sommino esattamente al totale della spesa
+    // Controllo di coerenza matematica: la somma delle quote frazionate deve corrispondere
+    // all'importo totale della spesa, tollerando imprecisioni di arrotondamento (0.01).
     if (Math.abs(sharesTotal - parsedAmount) > 0.01) {
       return res.status(400).json({
         error: `La somma delle quote (€${sharesTotal.toFixed(2)}) non corrisponde all'importo totale (€${parsedAmount.toFixed(2)}).`
@@ -188,9 +192,9 @@ router.post('/expenses', (req, res) => {
   return res.json({ success: true, expense });
 });
 
-// =============================================
+
 // RIMBORSI
-// =============================================
+
 
 // Registra che un utente ha rimborsato un altro
 router.post('/reimbursements', (req, res) => {
